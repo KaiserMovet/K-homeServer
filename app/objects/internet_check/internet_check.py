@@ -119,10 +119,11 @@ class LogCollection:
         return LogCollection(logs=logs_from_month)
 
     def _load_logs(self):
-
-        with open(self.path) as file:
-            data = file.readlines()
-
+        try:
+            with open(self.path) as file:
+                data = file.readlines()
+        except FileNotFoundError:
+            data = []
         return data
 
     def __iter__(self):
