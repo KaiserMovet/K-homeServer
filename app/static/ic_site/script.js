@@ -9,7 +9,7 @@ function startTime() {
     var S = checkTime(today.getSeconds());
 
     document.getElementById('time').innerHTML =
-        Y + "." + m + "." + d + " - " + H + ":" + M + ":" + S;
+        Y + "." + m + "." + d + H + ":" + M + ":" + S;
 
     var t = setTimeout(startTime, 500);
 }
