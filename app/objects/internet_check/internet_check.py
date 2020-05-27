@@ -1,9 +1,13 @@
 from typing import List
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Markup
+import dateutil.relativedelta
 
 
 class Log:
+
+    datetime_format = "%Y.%m.%d - %H:%M:%S"
+
     def __init__(self, start_date, end_date, status):
         self.start_date = start_date
         self.end_date = end_date
@@ -19,6 +23,27 @@ class Log:
         end_date = max([self.end_date, log.end_date])
         return Log(start_date, end_date, self.status)
 
+    def msg(self):
+        time_log = self.end_date.strftime("%Y.%m.%d - %H:%M:%S")
+        if self.status:
+            has_connection_log = "There was connection for"
+        else:
+            has_connection_log = "There was no connection for"
+        time_with_con = self.get_delta()
+        time_with_con_log = F"{time_with_con.days} days, "\
+            F"{time_with_con.seconds//3600} hours and "\
+            F"{(time_with_con.seconds//60)%60} minutes"
+        return F"[{time_log}] {has_connection_log} {time_with_con_log}"
+
+    def cut(self, start_date=None, end_date=None):
+        if start_date is None or start_date < self.start_date:
+            start_date = self.start_date
+        if end_date is None or end_date > self.end_date:
+            end_date = self.end_date
+        if start_date > end_date:
+            return None
+        return Log(start_date, end_date, self.status)
+
     def __repr__(self):
         return F"<LOG: {self.start_date} {self.end_date} {self.status}>"
 
@@ -26,24 +51,78 @@ class Log:
         return Markup(F"LOG: {self.start_date} {self.end_date} {self.status}")
 
 
+class LogCollectionStatistic:
+    def __init__(self, connection: timedelta, no_connection: timedelta, start_date=None, end_date=None):
+        self.connection = connection
+        self.no_connection = no_connection
+        self.all = connection + no_connection
+        self.start_date = start_date
+        self.end_date = end_date
+
+    def get_percent(self, connection: bool):
+        counted_time = None
+        if connection:
+            counted_time = self.connection
+        else:
+            counted_time = self.no_connection
+
+        return counted_time * 100 / self.all
+
+
 class LogCollection:
 
     datetime_format = "%Y.%m.%d - %H:%M:%S"
 
-    def __init__(self, path):
-        self.path = path
-        logs = self.load_logs()
-        parsed_logs = self._parse_logs(logs)
-        parsed_logs = self._merge_logs(parsed_logs)
-        self.logs = parsed_logs
+    def __init__(self, path=None, logs=None):
+        if path:
+            self.path = path
+            logs = self._load_logs()
+            parsed_logs = self._parse_logs(logs)
+            parsed_logs = self._merge_logs(parsed_logs)
+            self.logs = parsed_logs
+            self.logs.reverse()
+        elif logs:
+            self.logs = logs
+        self.start_date = self.logs[-1].start_date
+        self.end_date = self.logs[0].end_date
         self._host_iter = 0
 
-    def load_logs(self):
-        try:
-            with open(self.path) as file:
-                data = file.readlines()
-        except FileNotFoundError:
-            data = []
+    def get_logs(self):
+        return self.logs
+
+    def get_statistics(self):
+        connection = timedelta()
+        no_connection = timedelta()
+        for log in self.logs:
+            if log.status:
+                connection += log.get_delta()
+            else:
+                no_connection += log.get_delta()
+        return LogCollectionStatistic(connection, no_connection,
+                                      self.logs[-1].start_date,
+                                      self.logs[0].end_date)
+
+    def get_collection_from_last_month(self):
+        all_logs = self.get_logs()
+        current_time = all_logs[0].end_date
+        month_ago = current_time + \
+            dateutil.relativedelta.relativedelta(months=-1)
+        logs_from_month = []
+
+        for log in all_logs:
+            if log.start_date >= month_ago:
+                logs_from_month.append(log)
+            elif log.end_date > month_ago:
+                logs_from_month.append(log.cut(start_date=month_ago))
+            else:
+                break
+        return LogCollection(logs=logs_from_month)
+
+    def _load_logs(self):
+
+        with open(self.path) as file:
+            data = file.readlines()
+
         return data
 
     def __iter__(self):
