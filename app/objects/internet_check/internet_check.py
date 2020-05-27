@@ -65,8 +65,11 @@ class LogCollectionStatistic:
             counted_time = self.connection
         else:
             counted_time = self.no_connection
-
-        return counted_time * 100 / self.all
+        try:
+            result = counted_time * 100 / self.all
+        except ZeroDivisionError:
+            return 0
+        return result
 
 
 class LogCollection:
