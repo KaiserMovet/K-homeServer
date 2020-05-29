@@ -166,7 +166,7 @@ class LogCollection:
 
     @staticmethod
     def _get_status(line: str):
-        return "There was connection" in line
+        return "There was connection" in line or "There is connection" in line
 
     @classmethod
     def _get_date(cls, line: str):
