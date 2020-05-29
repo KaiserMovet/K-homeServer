@@ -1,5 +1,6 @@
 <script type="text/javascript" src="{{ url_for('static', filename='ic_site/script.js') }}">
 </script>
+
 <table class="table">
     <tr>
         <td>
@@ -11,6 +12,10 @@
     </tr>
 
 </table>
+
+<canvas id="myChart" width="400" height="100", log_date_list="{{log_date_list}}" log_download_list="{{log_download_list}}" log_upload_list="{{log_upload_list}}"></canvas>
+
+
 <div class="card-group">
 
     {% for name, statistic in data.items() %}
@@ -46,7 +51,7 @@
     {% endfor %}
 </div>
 <div>
-    {% for log in log_collection %}
+    {% for log in internet_status %}
     <div class="{{'alert alert-success' if log.status else 'alert alert-danger'}}" role="alert">
         {{log.msg()}}
     </div>

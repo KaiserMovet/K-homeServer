@@ -86,8 +86,12 @@ class LogCollection:
             self.logs.reverse()
         elif logs:
             self.logs = logs
-        self.start_date = self.logs[-1].start_date
-        self.end_date = self.logs[0].end_date
+        if self.logs:
+            self.start_date = self.logs[-1].start_date
+            self.end_date = self.logs[0].end_date
+        else:
+            self.start_date = None
+            self.end_date = None
         self._host_iter = 0
 
     def get_logs(self):

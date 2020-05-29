@@ -25,6 +25,7 @@ class ConfigHandler:
     def __init__(self):
         conf_dict = self._load_file()
         self.INTERNET_CHECK_LOG = conf_dict.get("internet_check_log")
+        self.INTERNET_SPEED_LOG = conf_dict.get("internet_speed_log")
 
     def _load_file(self):
         with open(self.config_path) as file:

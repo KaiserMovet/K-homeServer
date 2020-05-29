@@ -1,0 +1,1 @@
+from .internet_speed import Log, LogCollection

@@ -1,7 +1,8 @@
 from .site import Site
 import app.render_manager as rm
 from flask import render_template, Markup
-from app.objects.internet_check import LogCollection
+from app.objects.internet_check import LogCollection as ic_LogCollection
+from app.objects.internet_speed import LogCollection as is_LogCollection
 
 
 class IcSite(Site):
@@ -9,19 +10,30 @@ class IcSite(Site):
     MAIN = "sites/ic_site/main.html"
 
     @classmethod
-    def action(cls, log_path):
+    def action(cls, log_path, speed_path):
         # Logic
-        log_collection = LogCollection(
+        # internet status
+        internet_status = ic_LogCollection(
             log_path)
-        all_statistics = log_collection.get_statistics()
+        all_statistics = internet_status.get_statistics()
         month_statistics = \
-            log_collection.get_collection_from_last_month().get_statistics()
+            internet_status.get_collection_from_last_month().get_statistics()
 
         data = {'all': {}, "month": {}}
         data['all'] = all_statistics
         data['month'] = month_statistics
-
+        # speed status
+        internet_speed = is_LogCollection(speed_path)
+        speed_data = {}
+        speed_data["all"] = internet_speed.get_statistics()
+        speed_data["month"] = \
+            internet_speed.get_collection_from_last_month().get_statistics()
+        log_date_list, log_download_list, log_upload_list = \
+            internet_speed.get_data_str()
         # Render
         content = Markup(render_template(
-            cls.MAIN, log_collection=log_collection, data=data))
+            cls.MAIN, internet_status=internet_status, data=data,
+            speed_data=speed_data,
+            log_date_list=log_date_list, log_download_list=log_download_list,
+            log_upload_list=log_upload_list))
         return rm.base_render(content)

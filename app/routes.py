@@ -27,4 +27,5 @@ def admin():
 @mapp.route("/internet_check")
 def ic_site():
     log_path = get_config().INTERNET_CHECK_LOG
-    return sm.IcSite.action(log_path=log_path)
+    speed_path = get_config().INTERNET_SPEED_LOG
+    return sm.IcSite.action(log_path=log_path, speed_path=speed_path)
