@@ -30,10 +30,16 @@ class IcSite(Site):
             internet_speed.get_collection_from_last_month().get_statistics()
         log_date_list, log_download_list, log_upload_list = \
             internet_speed.get_data_str()
+        # last status
+        last_status = {}
+        last_status["status"] = internet_status.logs[0].status
+        last_status["download"] = internet_speed.logs[0].download
+        last_status["upload"] = internet_speed.logs[0].upload
+
         # Render
         content = Markup(render_template(
             cls.MAIN, internet_status=internet_status, data=data,
             speed_data=speed_data,
             log_date_list=log_date_list, log_download_list=log_download_list,
-            log_upload_list=log_upload_list))
+            log_upload_list=log_upload_list, last_status=last_status))
         return rm.base_render(content)

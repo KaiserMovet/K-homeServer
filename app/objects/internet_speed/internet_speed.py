@@ -22,8 +22,8 @@ class LogCollectionStatistic:
         upload_list = [log.upload for log in logs]
         download_list = [log.download for log in logs]
 
-        self.avg_download = mean(download_list)
-        self.avg_upload = mean(upload_list)
+        self.avg_download = round(mean(download_list),1)
+        self.avg_upload = round(mean(upload_list),1)
         self.max_download = max(download_list)
         self.max_upload = max(upload_list)
         self.start_date = logs[-1].date
