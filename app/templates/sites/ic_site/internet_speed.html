@@ -21,8 +21,8 @@
         <tr id="{{name}}_dates" onClick="zoomChart('{{name}}')" start_date="{{stats.start_date}}"
             end_date="{{stats.end_date}}">
             <td scope="col">{{name}}</td>
-            <td scope="col" id="{{name}}_start_date">{{stats.start_date}}</td>
-            <td scope="col" id="{{name}}_end_date">{{stats.end_date}}</td>
+            <td scope="col" id="{{name}}_start_date">{{stats.start_date.strftime('%Y-%m-%d')}}</td>
+            <td scope="col" id="{{name}}_end_date">{{stats.end_date.strftime('%Y-%m-%d')}}</td>
             <td scope="col">{{stats.max_upload}}</td>
             <td scope="col">{{stats.max_download}}</td>
             <td scope="col">{{stats.avg_upload}}</td>

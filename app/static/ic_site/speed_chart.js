@@ -186,9 +186,16 @@ function parseData(data_collection) {
     return parsed_data
 }
 
+function resize_canvas() {
+    var ctx = document.getElementById('myChart');
+    ctx.width  = window.innerWidth*90/100;
+    ctx.height = window.innerHeight*50/100;
+  }
+
 function onLoad() {
     startTime();
-    zoomChart("all")
+    resize_canvas();
+    zoomChart("all");
 }
 
 
