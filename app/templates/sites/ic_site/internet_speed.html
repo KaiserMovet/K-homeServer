@@ -1,0 +1,32 @@
+<canvas id="myChart" width="400" height="100" , log_date_list="{{log_date_list}}"
+    log_download_list="{{log_download_list}}" log_upload_list="{{log_upload_list}}"></canvas>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">From</th>
+            <th scope="col">To</th>
+            <th scope="col">Max upload</th>
+            <th scope="col">Max download</th>
+            <th scope="col">Avg upload</th>
+            <th scope="col">Avg download</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        {% for name, stats in speed_data.items()%}
+        <tr id="{{name}}_dates" onClick="zoomChart('{{name}}')" start_date="{{stats.start_date}}"
+            end_date="{{stats.end_date}}">
+            <td scope="col">{{name}}</td>
+            <td scope="col" id="{{name}}_start_date">{{stats.start_date}}</td>
+            <td scope="col" id="{{name}}_end_date">{{stats.end_date}}</td>
+            <td scope="col">{{stats.max_upload}}</td>
+            <td scope="col">{{stats.max_download}}</td>
+            <td scope="col">{{stats.avg_upload}}</td>
+            <td scope="col">{{stats.avg_download}}</td>
+
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

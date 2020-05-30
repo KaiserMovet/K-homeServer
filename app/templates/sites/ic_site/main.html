@@ -42,7 +42,7 @@
         <div class="card-header" id="headingOne">
             <h5 class="mb-0">
                 <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne"
-                    aria-expanded="false" aria-controls="collapseOne">
+                    aria-expanded="true" aria-controls="collapseOne">
                     Internet Speed
                 </button>
             </h5>
@@ -51,38 +51,8 @@
         <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
             <div class="card-body">
 
+                {{internet_speed_content}}
 
-                <canvas id="myChart" width="400" height="100" , log_date_list="{{log_date_list}}"
-                    log_download_list="{{log_download_list}}" log_upload_list="{{log_upload_list}}"></canvas>
-
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">From</th>
-                            <th scope="col">To</th>
-                            <th scope="col">Max upload</th>
-                            <th scope="col">Max download</th>
-                            <th scope="col">Avg upload</th>
-                            <th scope="col">Avg download</th>
-
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for name, stats in speed_data.items()%}
-                        <tr id="{{name}}_dates" onClick="zoomChart('{{name}}')" start_date="{{stats.start_date}}" end_date="{{stats.end_date}}">
-                            <td scope="col">{{name}}</td>
-                            <td scope="col" id="{{name}}_start_date">{{stats.start_date}}</td>
-                            <td scope="col" id="{{name}}_end_date">{{stats.end_date}}</td>
-                            <td scope="col">{{stats.max_upload}}</td>
-                            <td scope="col">{{stats.max_download}}</td>
-                            <td scope="col">{{stats.avg_upload}}</td>
-                            <td scope="col">{{stats.avg_download}}</td>
-
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>
@@ -98,47 +68,8 @@
         <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
             <div class="card-body">
 
-                <div class="card-group">
+                {{internet_status_content}}
 
-                    {% for name, statistic in data.items() %}
-
-                    <div class="card text-center" style="width: 18rem;">
-                        <div class="card-body">
-                            <h5 class="card-title">Logs for {{ name }}</h5>
-                            <p class="card-text">From {{statistic.start_date.strftime("%Y.%m.%d")}} to
-                                {{statistic.end_date.strftime("%Y.%m.%d")}}</p>
-                            <p class="card-text">{{statistic.all.days}} days, {{statistic.all.seconds//3600}} hours and
-                                {{(statistic.all.seconds//60)%60}} minutes</p>
-                        </div>
-                        <ul class="list-group list-group-flush">
-
-                            {% for connection, connection_bool, entry_msg, color in [(statistic.connection, True, "There was connection for", "bg-success"),
-                                                                             (statistic.no_connection, False, "There was no connection for", "bg-danger")] %}
-                            <li class="list-group-item {{color}}">
-                                <p class="card-text">{{entry_msg}}</p>
-                                <p class="card-text">{{connection.days}} days, {{connection.seconds//3600}}
-                                    hours and
-                                    {{(connection.seconds//60)%60}} minutes</p>
-                                <p class="card-text font-weight-bold">
-                                    {{"{:.2f}".format(statistic.get_percent(connection_bool))}}%</p>
-                            </li>
-
-                            {% endfor %}
-
-                        </ul>
-
-
-                    </div>
-
-                    {% endfor %}
-                </div>
-                <div>
-                    {% for log in internet_status %}
-                    <div class="{{'alert alert-success' if log.status else 'alert alert-danger'}}" role="alert">
-                        {{log.msg()}}
-                    </div>
-                    {% endfor %}
-                </div>
             </div>
         </div>
     </div>

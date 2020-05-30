@@ -36,18 +36,27 @@ var pam_enabled = true;
 function createChartObj(ctx, data_collection, zoom_dates) {
     new Chart(ctx, {
         type: 'line',
+        label: "MB",
         options: {
             plugins: getPlugin(),
             scales: {
+                yAxes: [{
+                    ticks: {
+                        // Include a dollar sign in the ticks
+                        callback: function (value, index, values) {
+                            return value + " Mb/s";
+                        }
+                    }
+                }],
                 xAxes: [{
 
                     type: 'time',
                     ticks: {
-                        max: zoom_dates["end"].add(1,'days'),
-                        min: zoom_dates["start"].add(-1,'days'),
-                        },
+                        max: zoom_dates["end"].add(1, 'days'),
+                        min: zoom_dates["start"].add(-1, 'days'),
+                    },
                     time: {
-                        
+
 
                         displayFormats: {
                             quarter: 'MMM YYYY',
@@ -207,17 +216,17 @@ function zoomChart(name) {
     if (name == "") {
         name = "all";
     }
-    if (name == "all"){
+    if (name == "all") {
         document.getElementById("all_dates").classList.add('table-primary');
         document.getElementById("month_dates").classList.remove('table-primary');
 
-    }else{
+    } else {
         document.getElementById("month_dates").classList.add('table-primary');
         document.getElementById("all_dates").classList.remove('table-primary');
     }
     char_dates_name = name;
     var mc = document.getElementById(name + "_dates");
-    
+
     start_date = mc.getAttribute("start_date")
     end_date = mc.getAttribute("end_date");
     getChart(
