@@ -74,5 +74,5 @@ class IcSite(Site):
         content = Markup(render_template(
             cls.MAIN, last_status=last_status,
             internet_status_content=internet_status_content,
-            internet_speed_content=internet_speed_content, internet_status=internet_status[0]))
+            internet_speed_content=internet_speed_content, internet_status=internet_status.logs[0]))
         return rm.base_render(content)
