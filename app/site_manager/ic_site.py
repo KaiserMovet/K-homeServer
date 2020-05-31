@@ -71,8 +71,10 @@ class IcSite(Site):
             cls.INTERNET_STATUS,
             internet_status=internet_status, data=data))
 
+        last_log_msg = internet_status.logs[0].msg().split(']')[1]
         content = Markup(render_template(
             cls.MAIN, last_status=last_status,
             internet_status_content=internet_status_content,
-            internet_speed_content=internet_speed_content, internet_status=internet_status.logs[0]))
+            internet_speed_content=internet_speed_content,
+            last_log_msg=last_log_msg))
         return rm.base_render(content)
