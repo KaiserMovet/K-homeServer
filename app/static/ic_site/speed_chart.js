@@ -188,9 +188,9 @@ function parseData(data_collection) {
 
 function resize_canvas() {
     var ctx = document.getElementById('myChart');
-    ctx.width  = window.innerWidth*90/100;
-    ctx.height = window.innerHeight*50/100;
-  }
+    ctx.width = window.innerWidth * 90 / 100;
+    ctx.height = window.innerHeight * 40 / 100;
+}
 
 function onLoad() {
     startTime();
