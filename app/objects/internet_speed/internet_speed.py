@@ -2,6 +2,8 @@ from typing import List
 import dateutil.relativedelta
 from datetime import datetime
 from statistics import mean
+import json
+
 
 class Log:
 
@@ -11,30 +13,15 @@ class Log:
         self.date = date
         self.download = download
         self.upload = upload
-    
+
     def __repr__(self):
         return F"<LOG: {self.date} {self.download} {self.upload}>"
-
-
-class LogCollectionStatistic:
-    
-    def __init__(self, logs):
-        upload_list = [log.upload for log in logs]
-        download_list = [log.download for log in logs]
-
-        self.avg_download = round(mean(download_list),1)
-        self.avg_upload = round(mean(upload_list),1)
-        self.max_download = max(download_list)
-        self.max_upload = max(upload_list)
-        self.start_date = logs[-1].date
-        self.end_date = logs[0].date
 
 
 class LogCollection:
 
     datetime_format = "%Y.%m.%d - %H:%M:%S"
     datetime_format_short = "%Y.%m.%d %H:%M"
-
 
     def __init__(self, path=None, logs=None):
         if path:
@@ -55,9 +42,6 @@ class LogCollection:
             data = []
         return data
 
-    def get_statistics(self):
-        return LogCollectionStatistic(self.logs)
-
     def get_collection_from_last_month(self):
         all_logs = self.get_logs()
         current_time = all_logs[0].date
@@ -72,7 +56,6 @@ class LogCollection:
                 break
         return LogCollection(logs=logs_from_month)
 
-
     @classmethod
     def _parse_logs(cls, logs: List[str]) -> List[Log]:
         parsed_logs = []
@@ -80,6 +63,7 @@ class LogCollection:
             date = cls._get_date(log)
             speeds = log.split()[-2:]
             download = float(speeds[0])
+            print(speeds[1])
             upload = float(speeds[1])
             parsed_logs.append(Log(date, download, upload))
         return parsed_logs
@@ -106,3 +90,12 @@ class LogCollection:
         if log_date_list:
             log_date_list = log_date_list[:-2]
         return log_date_list, log_download_list, log_upload_list
+
+    def to_json(self):
+        data = {}
+        data["date"] = [log.date.strftime(
+            "%Y.%m.%d - %H:%M:%S") for log in self.logs]
+        data["download"] = [log.download for log in self.logs]
+        data["upload"] = [log.upload for log in self.logs]
+
+        return json.dumps(data)

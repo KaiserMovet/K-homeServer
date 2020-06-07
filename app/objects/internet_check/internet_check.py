@@ -1,3 +1,4 @@
+import json
 from typing import List
 from datetime import datetime, timedelta
 from flask import Markup
@@ -51,27 +52,6 @@ class Log:
         return Markup(F"LOG: {self.start_date} {self.end_date} {self.status}")
 
 
-class LogCollectionStatistic:
-    def __init__(self, connection: timedelta, no_connection: timedelta, start_date=None, end_date=None):
-        self.connection = connection
-        self.no_connection = no_connection
-        self.all = connection + no_connection
-        self.start_date = start_date
-        self.end_date = end_date
-
-    def get_percent(self, connection: bool):
-        counted_time = None
-        if connection:
-            counted_time = self.connection
-        else:
-            counted_time = self.no_connection
-        try:
-            result = counted_time * 100 / self.all
-        except ZeroDivisionError:
-            return 0
-        return result
-
-
 class LogCollection:
 
     datetime_format = "%Y.%m.%d - %H:%M:%S"
@@ -96,18 +76,6 @@ class LogCollection:
 
     def get_logs(self):
         return self.logs
-
-    def get_statistics(self):
-        connection = timedelta()
-        no_connection = timedelta()
-        for log in self.logs:
-            if log.status:
-                connection += log.get_delta()
-            else:
-                no_connection += log.get_delta()
-        return LogCollectionStatistic(connection, no_connection,
-                                      self.logs[-1].start_date,
-                                      self.logs[0].end_date)
 
     def get_collection_from_last_month(self):
         all_logs = self.get_logs()
@@ -178,3 +146,13 @@ class LogCollection:
         date_str = line.split("]")[1]
         date = datetime.strptime(date_str, cls.datetime_format)
         return date
+
+    def to_json(self):
+        data = {}
+        data["start_date"] = [log.start_date.strftime(
+            "%Y.%m.%d - %H:%M:%S") for log in self.logs]
+        data["end_date"] = [log.start_date.strftime(
+            "%Y.%m.%d - %H:%M:%S") for log in self.logs]
+        data["status"] = [log.status for log in self.logs]
+
+        return json.dumps(data)

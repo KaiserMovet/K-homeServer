@@ -13,17 +13,8 @@ class IcSite(Site):
 
     @classmethod
     def action(cls, log_path, speed_path):
-        # internet status
-        internet_status, data = cls.get_status_data(log_path)
-        # speed status
-        internet_speed, speed_data, log_date_list, log_download_list, \
-            log_upload_list = cls.get_speed_data(speed_path)
-        # last status
-        last_status = cls.get_last_status(internet_status, internet_speed)
         # Render
-        return cls.render(internet_status, data, speed_data,
-                          log_date_list,
-                          log_download_list, log_upload_list, last_status)
+        return cls.render()
 
     @staticmethod
     def get_status_data(log_path):
@@ -58,23 +49,16 @@ class IcSite(Site):
         return last_status
 
     @classmethod
-    def render(cls, internet_status, data, speed_data, log_date_list,
-               log_download_list, log_upload_list, last_status):
+    def render(cls):
 
         internet_speed_content = Markup(render_template(
-            cls.INTERNET_SPEED,
-            speed_data=speed_data,
-            log_date_list=log_date_list, log_download_list=log_download_list,
-            log_upload_list=log_upload_list))
+            cls.INTERNET_SPEED))
 
         internet_status_content = Markup(render_template(
-            cls.INTERNET_STATUS,
-            internet_status=internet_status, data=data))
+            cls.INTERNET_STATUS))
 
-        last_log_msg = internet_status.logs[0].msg().split(']')[1]
         content = Markup(render_template(
-            cls.MAIN, last_status=last_status,
+            cls.MAIN,
             internet_status_content=internet_status_content,
-            internet_speed_content=internet_speed_content,
-            last_log_msg=last_log_msg))
+            internet_speed_content=internet_speed_content))
         return rm.base_render(content)

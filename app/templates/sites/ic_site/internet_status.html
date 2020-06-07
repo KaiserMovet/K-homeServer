@@ -1,26 +1,26 @@
 <div class="card-group">
 
-    {% for name, statistic in data.items() %}
+    {% for name in ["all", "month"] %}
 
     <div class="card text-center" style="width: 18rem;">
         <div class="card-body">
             <h5 class="card-title">Logs for {{ name }}</h5>
-            <p class="card-text">From {{statistic.start_date.strftime("%Y.%m.%d")}} to
-                {{statistic.end_date.strftime("%Y.%m.%d")}}</p>
-            <p class="card-text">{{statistic.all.days}} days, {{statistic.all.seconds//3600}} hours and
-                {{(statistic.all.seconds//60)%60}} minutes</p>
+            <p class="card-text">From to
+            </p>
+            <p class="card-text"> days, hours and
+                minutes</p>
         </div>
         <ul class="list-group list-group-flush">
 
-            {% for connection, connection_bool, entry_msg, color in [(statistic.connection, True, "There was connection for", "bg-success"),
-                                                             (statistic.no_connection, False, "There was no connection for", "bg-danger")] %}
+            {% for entry_msg, color in [( "There was connection for", "bg-success"),
+                                        ( "There was no connection for", "bg-danger")] %}
             <li class="list-group-item {{color}}">
                 <p class="card-text">{{entry_msg}}</p>
-                <p class="card-text">{{connection.days}} days, {{connection.seconds//3600}}
+                <p class="card-text">days,
                     hours and
-                    {{(connection.seconds//60)%60}} minutes</p>
+                    minutes</p>
                 <p class="card-text font-weight-bold">
-                    {{"{:.2f}".format(statistic.get_percent(connection_bool))}}%</p>
+                </p>
             </li>
 
             {% endfor %}
@@ -33,9 +33,9 @@
     {% endfor %}
 </div>
 <div>
-    {% for log in internet_status %}
+    {% for log in [] %}
     <div class="{{'alert alert-success' if log.status else 'alert alert-danger'}}" role="alert">
-        {{log.msg()}}
+        {{log}}
     </div>
     {% endfor %}
 </div>
