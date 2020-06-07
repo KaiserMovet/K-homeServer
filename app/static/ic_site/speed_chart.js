@@ -224,5 +224,5 @@ function zoomChart(name) {
 
 }
 
-window.onload = onLoad;
+// window.onload = onLoad;
 
