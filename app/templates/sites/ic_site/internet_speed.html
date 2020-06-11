@@ -1,3 +1,4 @@
+<data id="internet_speed_data"></data>
 <script type="text/javascript" src="{{ url_for('static', filename='ic_site/speed_chart.js') }}">
 </script>
 <canvas id="myChart" width="400" height="100" , log_date_list="" log_download_list="" log_upload_list=""></canvas>
@@ -17,15 +18,14 @@
     </thead>
     <tbody>
         {% for name in ["all", "month"] %}
-        <tr id="{{name}}_dates" onClick="zoomChart('{{name}}')" start_date="" end_date="">
+        <tr id="{{name}}_dates" onClick="SpeedStatus.zoomChart('{{name}}')">
             <td scope="col">{{name}}</td>
             <td scope="col" id="{{name}}_start_date"></td>
             <td scope="col" id="{{name}}_end_date"></td>
-            <td scope="col"></td>
-            <td scope="col"></td>
-            <td scope="col"></td>
-            <td scope="col"></td>
-
+            <td scope="col" id="{{name}}_max_upload"></td>
+            <td scope="col" id="{{name}}_max_download"></td>
+            <td scope="col" id="{{name}}_avg_upload"></td>
+            <td scope="col" id="{{name}}_avg_download"></td>
         </tr>
         {% endfor %}
     </tbody>

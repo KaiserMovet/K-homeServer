@@ -63,7 +63,6 @@ class LogCollection:
             date = cls._get_date(log)
             speeds = log.split()[-2:]
             download = float(speeds[0])
-            print(speeds[1])
             upload = float(speeds[1])
             parsed_logs.append(Log(date, download, upload))
         return parsed_logs
