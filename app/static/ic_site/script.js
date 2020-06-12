@@ -16,7 +16,14 @@ var MainMsg = {
         document.getElementById("last_upload").innerHTML = upload + " Mb/s";
     },
 
-    setStatus: function (status, msg) {
+    setCurrentLength: function (duration_msg, status) {
+        el = document.getElementById("current_length_msg");
+        msg = "For ";
+        msg += duration_msg;
+        el.innerHTML = msg;
+    },
+
+    setStatus: function (status) {
         main_msg = document.getElementById("main_msg");
         last_speed = document.getElementById("last_speed");
         status_msg = document.getElementById("current_status");
@@ -337,7 +344,12 @@ var InternetStatus = {
     generate_logs: function (json_data) {
         logs = document.getElementById("status_logs");
         logs.innerHTML = "";
-
+        //MainMSG
+        duration = moment.duration(json_data["end_date"][0].diff(json_data["start_date"][0]));
+        console.log(duration)
+        duration_msg = this.getMsgFromDuration(duration);
+        MainMsg.setCurrentLength(duration_msg, json_data["status"][0]);
+        //Logs
         for (let i = 0; i < json_data["status"].length; i++) {
             logs.innerHTML += "\n" + this.generate_log(json_data["start_date"][i], json_data["end_date"][i], json_data["status"][i])
         }
