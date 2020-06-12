@@ -419,8 +419,9 @@ var DataProvider = {
     },
 
     refresh: function () {
-        url_internet_status = "http://localhost:5000/api/internet_status";
-        url_internet_speed = "http://localhost:5000/api/internet_speed";
+        local = window.location.origin;
+        url_internet_status = local + "/api/internet_status";
+        url_internet_speed = local + "/api/internet_speed";
 
         var client = new this.HttpClient();
         client.get(url_internet_status, function (response) {
