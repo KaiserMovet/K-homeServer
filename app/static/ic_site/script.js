@@ -16,7 +16,7 @@ var MainMsg = {
         document.getElementById("last_upload").innerHTML = upload + " Mb/s";
     },
 
-    setStatus: function (status) {
+    setStatus: function (status, msg) {
         main_msg = document.getElementById("main_msg");
         last_speed = document.getElementById("last_speed");
         status_msg = document.getElementById("current_status");
@@ -35,6 +35,7 @@ var MainMsg = {
             status_msg.innerHTML = "No connection"
         }
     },
+
 }
 
 var SpeedStatus = {
@@ -213,7 +214,6 @@ var SpeedStatus = {
     },
 
     saveDataToTable: function (table_data) {
-        console.log(table_data);
         for (const name of ["all", "month"]) {
             //Dates
             document.getElementById(name + "_start_date").innerHTML = Utils.dateToShortStr(table_data[name + "_start_date"]);
@@ -361,20 +361,20 @@ var InternetStatus = {
         }
 
         for (const name of ["all", "month"]) {
+            // Values per cent
+            duration[name]['percent'] = {}
+            for (const status of [true, false]) {
+                dur_in_percent = 0;
+                if (duration[name][status]) {
+                    dur_in_percent = Math.round(duration[name][status] * 100 / (duration[name][true] + duration[name][false]) * 100) / 100;
+                }
+                duration[name]["percent"][status] = dur_in_percent.toFixed(2);
+            }
             //sum
             duration[name]['sum'] = moment.duration(duration[name][true] + duration[name][false]);
             //Duration of statuses
             for (const status of [true, false]) {
                 duration[name][status] = moment.duration(duration[name][status])
-            }
-            // Values per cent
-            duration[name]['percent'] = {}
-            for (const status of [true, false]) {
-                dur_in_percent = 0.00;
-                if (duration[name][status]) {
-                    dur_in_percent = Math.round((duration[name][true] + duration[name][false]) / duration[name][status] * 100 * 100) / 100;
-                }
-                duration[name]["percent"][status] = dur_in_percent;
             }
         }
         return duration;
@@ -393,8 +393,14 @@ var InternetStatus = {
         for (const name of ["all", "month"]) {
             document.getElementById(name + "_end").innerHTML = Utils.dateToShortStr(json_data["end_date"][0]);
             document.getElementById(name + "_duration_msg").innerHTML = this.getMsgFromDuration(duration[name]["sum"]);
-            document.getElementById(name + "_true_duration_msg").innerHTML = this.getMsgFromDuration(duration[name][true]);
-            document.getElementById(name + "_false_duration_msg").innerHTML = this.getMsgFromDuration(duration[name][false]);
+            for (const status of [true, false]) {
+                document.getElementById(name + "_" + status + "_duration_msg").innerHTML = this.getMsgFromDuration(duration[name][status]);
+                //Bar
+                bar = document.getElementById(name + "_" + status + "_bar");
+                bar.innerHTML = duration[name]['percent'][status] + "%";
+                bar.style.width = duration[name]['percent'][status] + "%";
+                bar.aria_valuenow = duration[name]['percent'][status];
+            }
         }
 
         document.getElementById("all_start").innerHTML = Utils.dateToShortStr(json_data["start_date"].slice(-1)[0]);
@@ -410,7 +416,8 @@ var InternetStatus = {
 
     refresh: function () {
         json_data = this.getJsonData();
-        MainMsg.setStatus(json_data["status"][0]);
+        last_duration_msg = json_data["status"][0]
+        MainMsg.setStatus(json_data["status"][0], "");
         this.generate_logs(json_data);
         this.prepare_table(json_data);
     },
