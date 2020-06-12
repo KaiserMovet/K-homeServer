@@ -500,7 +500,7 @@ var Utils = {
         if (bar.getAttribute("data_refresh") == 'false') {
             return;
         }
-        all_sec = 60 * 5;
+        all_sec = 60 * 1;
         current_sec = bar.getAttribute("data_time");
         current_sec -= 1;
         if (current_sec < 0) {
