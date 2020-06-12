@@ -1,3 +1,4 @@
+<data id="internet_status_data"></data>
 <div class="card-group">
 
     {% for name in ["all", "month"] %}
@@ -5,20 +6,16 @@
     <div class="card text-center" style="width: 18rem;">
         <div class="card-body">
             <h5 class="card-title">Logs for {{ name }}</h5>
-            <p class="card-text">From to
+            <p class="card-text">From <span id="{{name}}_start"></span> to <span id="{{name}}_end"></span>
             </p>
-            <p class="card-text"> days, hours and
-                minutes</p>
+            <p class="card-text" id="{{name}}_duration_msg"></p>
         </div>
         <ul class="list-group list-group-flush">
 
-            {% for entry_msg, color in [( "There was connection for", "bg-success"),
-                                        ( "There was no connection for", "bg-danger")] %}
+            {% for color, status in [("bg-success", "true"), ("bg-danger", "false")] %}
             <li class="list-group-item {{color}}">
-                <p class="card-text">{{entry_msg}}</p>
-                <p class="card-text">days,
-                    hours and
-                    minutes</p>
+                <p class="card-text" id="{{name}}_{{status}}_entry_msg"></p>
+                <p class="card-text" id="{{name}}_{{status}}_duration_msg"></p>
                 <p class="card-text font-weight-bold">
                 </p>
             </li>
@@ -32,7 +29,7 @@
 
     {% endfor %}
 </div>
-<div>
+<div id="status_logs">
     {% for log in [] %}
     <div class="{{'alert alert-success' if log.status else 'alert alert-danger'}}" role="alert">
         {{log}}

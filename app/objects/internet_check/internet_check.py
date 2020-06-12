@@ -143,6 +143,7 @@ class LogCollection:
     @classmethod
     def _get_date(cls, line: str):
         line = line.replace("[", "]")
+        print(line)
         date_str = line.split("]")[1]
         date = datetime.strptime(date_str, cls.datetime_format)
         return date
@@ -151,7 +152,7 @@ class LogCollection:
         data = {}
         data["start_date"] = [log.start_date.strftime(
             "%Y.%m.%d - %H:%M:%S") for log in self.logs]
-        data["end_date"] = [log.start_date.strftime(
+        data["end_date"] = [log.end_date.strftime(
             "%Y.%m.%d - %H:%M:%S") for log in self.logs]
         data["status"] = [log.status for log in self.logs]
 

@@ -1,5 +1,42 @@
 
 
+var MainMsg = {
+    setEmoji: function (status) {
+        emoji = document.getElementById("emoji");
+        if (status) {
+            emoji_code = '<svg class="bi bi-emoji-laughing" width="2em" height="2em" viewBox="0 0 16 16"fill = "currentColor" xmlns = "http://www.w3.org/2000/svg" ><path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" /><path fill-rule="evenodd" d="M12.331 9.5a1 1 0 0 1 0 1A4.998 4.998 0 0 1 8 13a4.998 4.998 0 0 1-4.33-2.5A1 1 0 0 1 4.535 9h6.93a1 1 0 0 1 .866.5z" /><path d="M7 6.5c0 .828-.448 0-1 0s-1 .828-1 0S5.448 5 6 5s1 .672 1 1.5zm4 0c0 .828-.448 0-1 0s-1 .828-1 0S9.448 5 10 5s1 .672 1 1.5z" /></svg > ';
+        } else {
+            emoji_code = '<svg class="bi bi-emoji-frown" width="2em" height="2em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" /><path fill-rule="evenodd" d="M4.285 12.433a.5.5 0 0 0 .683-.183A3.498 3.498 0 0 1 8 10.5c1.295 0 2.426.703 3.032 1.75a.5.5 0 0 0 .866-.5A4.498 4.498 0 0 0 8 9.5a4.5 4.5 0 0 0-3.898 2.25.5.5 0 0 0 .183.683z" /><path d="M7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5zm4 0c0 .828-.448 1.5-1 1.5s-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5z" /></svg>'
+        }
+        emoji.innerHTML = emoji_code;
+    },
+
+    setSpeed: function (upload, download) {
+        document.getElementById("last_download").innerHTML = download + " Mb/s";
+        document.getElementById("last_upload").innerHTML = upload + " Mb/s";
+    },
+
+    setStatus: function (status) {
+        main_msg = document.getElementById("main_msg");
+        last_speed = document.getElementById("last_speed");
+        status_msg = document.getElementById("current_status");
+        this.setEmoji(status);
+        if (status) {
+            main_msg.classList.remove("alert-danger");
+            main_msg.classList.add("alert-success");
+            last_speed.classList.remove("invisible");
+            last_speed.classList.add("visible");
+            status_msg.innerHTML = "OK!"
+        } else {
+            main_msg.classList.remove("alert-success");
+            main_msg.classList.add("alert-danger");
+            last_speed.classList.remove("visible");
+            last_speed.classList.add("invisible");
+            status_msg.innerHTML = "No connection"
+        }
+    },
+}
+
 var SpeedStatus = {
 
     strToMoment: function (date) {
@@ -147,9 +184,10 @@ var SpeedStatus = {
     prepareBoundries: function (data_collection) {
         var boundry_mode = this.getData("boundry_mode");
 
-        start_date = data_collection["upload"].slice(-1)[0]['x'].clone();
-        if (boundry_mode == "month" && start_date.diff(start_date.clone().add(-1, 'month')) < 0) {
-            start_date.add(-1, 'month');
+        if (boundry_mode == "month") {
+            start_date = moment(document.getElementById("month_start_date").innerHTML, "YYYY.MM.DD")
+        } else {
+            start_date = moment(document.getElementById("all_start_date").innerHTML, "YYYY.MM.DD")
         }
         end_date = data_collection["upload"][0]['x'].clone();
 
@@ -174,6 +212,24 @@ var SpeedStatus = {
         return (data_list.reduce((a, b) => a + b, 0) / data_list.length).toFixed(1);
     },
 
+    saveDataToTable: function (table_data) {
+        //Dates
+        document.getElementById("all_start_date").innerHTML = Utils.dateToShortStr(table_data["all_start_date"]);
+        document.getElementById("all_end_date").innerHTML = Utils.dateToShortStr(table_data["all_end_date"]);
+        document.getElementById("month_start_date").innerHTML = Utils.dateToShortStr(table_data["month_start_date"]);
+        document.getElementById("month_end_date").innerHTML = Utils.dateToShortStr(table_data["month_end_date"]);
+        //Max and avg
+        document.getElementById("all_max_upload").innerHTML = Math.max.apply(Math, all_values['upload']) + " Mb/s";
+        document.getElementById("all_max_download").innerHTML = Math.max.apply(Math, all_values['download']) + " Mb/s";
+        document.getElementById("all_avg_upload").innerHTML = this.get_avg(all_values['upload']) + " Mb/s";
+        document.getElementById("all_avg_download").innerHTML = this.get_avg(all_values['download']) + " Mb/s";
+        document.getElementById("month_max_upload").innerHTML = Math.max.apply(Math, month_values['upload']) + " Mb/s";
+        document.getElementById("month_max_download").innerHTML = Math.max.apply(Math, month_values['download']) + " Mb/s";
+        document.getElementById("month_avg_upload").innerHTML = this.get_avg(month_values['upload']) + " Mb/s";
+        document.getElementById("month_avg_download").innerHTML = this.get_avg(month_values['download']) + " Mb/s";
+
+    },
+
     refreshTable: function (data_collection) {
         all_values = { 'upload': [], 'download': [] };
         month_values = { 'upload': [], 'download': [] };
@@ -185,7 +241,6 @@ var SpeedStatus = {
             data_collection["upload"][0]["x"];
         table_data["month_start_date"] = table_data["all_end_date"];
         table_data["month_end_date"] = table_data["all_end_date"];
-        console.log(data_collection)
         for (let i = 0; i < data_collection["upload"].length; i++) {
             if (table_data["month_start_date"] > data_collection["upload"][i]["x"] && table_data["all_end_date"].clone().add(-1, 'month') < (data_collection["upload"][i]["x"])) {
                 table_data["month_start_date"] = data_collection["upload"][i]["x"];
@@ -197,29 +252,16 @@ var SpeedStatus = {
             all_values['upload'].push(data_collection["upload"][i]["y"]);
             all_values['download'].push(data_collection["download"][i]["y"]);
         }
-        //Dates
-        document.getElementById("all_start_date").innerHTML = table_data["all_start_date"].format("YYYY-MM-DD");
-        document.getElementById("all_end_date").innerHTML = table_data["all_end_date"].format("YYYY-MM-DD");
-        document.getElementById("month_start_date").innerHTML = table_data["month_start_date"].format("YYYY-MM-DD");
-        document.getElementById("month_end_date").innerHTML = table_data["month_end_date"].format("YYYY-MM-DD");
-        //Max and avg
-        document.getElementById("all_max_upload").innerHTML = Math.max.apply(Math, all_values['upload']) + " Mb/s";
-        document.getElementById("all_max_download").innerHTML = Math.max.apply(Math, all_values['download']) + " Mb/s";
-        document.getElementById("all_avg_upload").innerHTML = this.get_avg(all_values['upload']) + " Mb/s";
-        document.getElementById("all_avg_download").innerHTML = this.get_avg(all_values['download']) + " Mb/s";
-        document.getElementById("month_max_upload").innerHTML = Math.max.apply(Math, month_values['upload']) + " Mb/s";
-        document.getElementById("month_max_download").innerHTML = Math.max.apply(Math, month_values['download']) + " Mb/s";
-        document.getElementById("month_avg_upload").innerHTML = this.get_avg(month_values['upload']) + " Mb/s";
-        document.getElementById("month_avg_download").innerHTML = this.get_avg(month_values['download']) + " Mb/s";
-
+        this.saveDataToTable(table_data);
 
     },
 
     refresh: function () {
         var data_collection = this.getJsonData();
+        MainMsg.setSpeed(data_collection["upload"][0]["y"], data_collection["download"][0]["y"]);
+        this.refreshTable(data_collection);
         this.resizeCanvas();
         this.drawChar(data_collection);
-        this.refreshTable(data_collection);
     },
 
     zoomChart: function (name) {
@@ -241,30 +283,128 @@ var SpeedStatus = {
 
 }
 
+var InternetStatus = {
 
-var DataProvider = {
+    getMsgFromDuration: function (duration) {
+        days = Math.round(duration.as('days'));
+        hours = duration.hours();
+        minutes = duration.minutes();
+        duration_msg = days + " days, " + hours + " hours and " + minutes + " minutes.";
+        return duration_msg;
+    },
+
+    setData: function (name, data) {
+        el = document.getElementById('internet_status_data');
+        el.setAttribute(name, data);
+    },
+
+    getData: function (name) {
+        el = document.getElementById('internet_status_data');
+        if (el.hasAttribute(name)) {
+            return el.getAttribute(name);
+        }
+        else {
+            return "";
+        }
+    },
+
+    getJsonData: function () {
+        var data_collection = JSON.parse(this.getData("data_json"));
+        for (let i = 0; i < data_collection["status"].length; i++) {
+            data_collection["start_date"][i] = moment(data_collection["start_date"][i], "YYYY.MM.DD - HH:mm:ss")
+            data_collection["end_date"][i] = moment(data_collection["end_date"][i], "YYYY.MM.DD - HH:mm:ss")
+        }
+        return data_collection;
+    },
+
+    generate_log: function (start_date, end_date, status) {
+        end_date_str = "[" + Utils.dateToFullStr(end_date) + "]";
+        if (status) {
+            class_str = "alert alert-success";
+            msg = " There was connection for ";
+        } else {
+            class_str = "alert alert-danger";
+            msg = " There was no connection for "
+        }
+        duration = moment.duration(end_date.diff(start_date));
+        duration_msg = this.getMsgFromDuration(duration);
+        return `<div class="` + class_str + `" role="alert">` + end_date_str + msg + duration_msg + `</div>`
+    },
+
+    generate_logs: function (json_data) {
+        logs = document.getElementById("status_logs");
+        logs.innerHTML = "";
+
+        for (let i = 0; i < json_data["status"].length; i++) {
+            logs.innerHTML += "\n" + this.generate_log(json_data["start_date"][i], json_data["end_date"][i], json_data["status"][i])
+        }
+    },
+
+    getDurationData: function (json_data) {
+        duration = { 'all': { true: 0, false: 0 }, 'month': { true: 0, false: 0 } }
+        start_last_month = json_data["end_date"][0].clone().add(-1, 'month');
+        for (let i = 0; i < json_data["status"].length; i++) {
+            start_date = json_data["start_date"][i];
+            end_date = json_data["end_date"][i];
+            duration['all'][json_data["status"][i]] += end_date.diff(start_date);
+
+            if (end_date > start_last_month) {
+                if (start_date < start_last_month) {
+                    start_date = start_last_month;
+                }
+                duration['month'][json_data["status"][i]] += end_date.diff(start_date);
+            }
+
+        }
+        duration['all']['sum'] = moment.duration(duration['all'][true] + duration['all'][false]);
+        duration['month']['sum'] = moment.duration(duration['month'][true] + duration['month'][false]);
+        duration['all'][true] = moment.duration(duration['all'][true])
+        duration['all'][false] = moment.duration(duration['all'][false])
+        duration['month'][true] = moment.duration(duration['month'][true])
+        duration['month'][false] = moment.duration(duration['month'][false])
+
+        return duration;
+    },
+
+    setStaticMsg: function () {
+        is_connection = "There was connection for ";
+        is_no_connection = "There was no connection for ";
+        document.getElementById("all_true_entry_msg").innerHTML = is_connection;
+        document.getElementById("all_false_entry_msg").innerHTML = is_no_connection;
+        document.getElementById("month_true_entry_msg").innerHTML = is_connection;
+        document.getElementById("month_false_entry_msg").innerHTML = is_no_connection;
+    },
+
+    writeDataToTable: function (duration, json_data) {
+        document.getElementById("all_true_duration_msg").innerHTML = this.getMsgFromDuration(duration["all"][true]);
+        document.getElementById("all_false_duration_msg").innerHTML = this.getMsgFromDuration(duration["all"][false]);
+        document.getElementById("month_true_duration_msg").innerHTML = this.getMsgFromDuration(duration["month"][true]);
+        document.getElementById("month_false_duration_msg").innerHTML = this.getMsgFromDuration(duration["month"][false]);
+
+        document.getElementById("month_duration_msg").innerHTML = this.getMsgFromDuration(duration["month"]["sum"]);
+        document.getElementById("all_duration_msg").innerHTML = this.getMsgFromDuration(duration["all"]["sum"]);
+
+        document.getElementById("all_start").innerHTML = Utils.dateToShortStr(json_data["start_date"].slice(-1)[0]);
+        document.getElementById("all_end").innerHTML = Utils.dateToShortStr(json_data["end_date"][0]);
+        document.getElementById("month_start").innerHTML = Utils.dateToShortStr(json_data["end_date"][0].clone().add(-1, "month"));
+        document.getElementById("month_end").innerHTML = Utils.dateToShortStr(json_data["end_date"][0]);
+
+    },
+
+    prepare_table: function (json_data) {
+        duration = this.getDurationData(json_data);
+        this.writeDataToTable(duration, json_data)
+    },
+
     refresh: function () {
-        url_internet_status = "http://localhost:5000/api/internet_status";
-        url_internet_speed = "http://localhost:5000/api/internet_speed";
-
-        var client = new Utils.HttpClient();
-        client.get(url_internet_status, function (response) {
-
-        });
-        client.get(url_internet_speed, function (response) {
-            SpeedStatus.setData("data_json", response);
-            SpeedStatus.refresh();
-        });
+        json_data = this.getJsonData();
+        MainMsg.setStatus(json_data["status"][0]);
+        this.generate_logs(json_data);
+        this.prepare_table(json_data);
     },
 }
 
-var Utils = {
-    startTime: function () {
-        document.getElementById('current_time').innerHTML =
-            moment().format('YYYY.MM.DD HH:mm:ss');
-        var t = setTimeout(Utils.startTime, 1000);
-    },
-
+var DataProvider = {
     HttpClient: function () {
         this.get = function (aUrl, aCallback) {
             var anHttpRequest = new XMLHttpRequest();
@@ -278,21 +418,74 @@ var Utils = {
         }
     },
 
-    getData: function (url) {
-        var client = new Utils.HttpClient();
-        var response;
-        client.get(url, function (response) {
-            res = response;
+    refresh: function () {
+        url_internet_status = "http://localhost:5000/api/internet_status";
+        url_internet_speed = "http://localhost:5000/api/internet_speed";
+
+        var client = new this.HttpClient();
+        client.get(url_internet_status, function (response) {
+            InternetStatus.setData("data_json", response);
+            InternetStatus.refresh();
         });
-        return res;
+        client.get(url_internet_speed, function (response) {
+            SpeedStatus.setData("data_json", response);
+            SpeedStatus.refresh();
+        });
+    },
+}
+
+var Utils = {
+    startTime: function () {
+        document.getElementById('current_time').innerHTML =
+            Utils.dateToFullStr(moment());
+        setTimeout(Utils.startTime, 1000);
+    },
+
+    dateToShortStr: function (date) {
+        return date.format("YYYY.MM.DD");
+    },
+
+    dateToFullStr: function (date) {
+        return date.format("YYYY.MM.DD - HH:mm:ss");
+    },
+
+    clickProgressBar: function () {
+        bar = document.getElementById("autorefresh_bar");
+        data_refresh = bar.getAttribute("data_refresh");
+        if (data_refresh == "true") {
+            data_refresh = 'false';
+            bar.classList.add("bg-danger");
+        } else {
+            data_refresh = 'true';
+            bar.classList.remove("bg-danger");
+        }
+        bar.setAttribute("data_refresh", data_refresh);
     },
 
     refresh: function () {
+        setTimeout(Utils.refresh, 1000);
+        bar = document.getElementById("autorefresh_bar");
+        if (bar.getAttribute("data_refresh") == 'false') {
+            return;
+        }
+        all_sec = 60 * 5;
+        current_sec = bar.getAttribute("data_time");
+        current_sec -= 1;
+        if (current_sec < 0) {
+            current_sec = all_sec;
+            DataProvider.refresh();
+        }
+        bar.setAttribute("data_time", current_sec);
+        bar.innerHTML = current_sec + "s"
+        percent = (all_sec - current_sec) * 100 / all_sec
+        bar.style.width = percent + "%";
+        bar.aria_valuenow = all_sec - current_sec;
     },
 
     onLoad: function () {
         Utils.startTime();
-        DataProvider.refresh();
+        InternetStatus.setStaticMsg();
+        Utils.refresh();
     }
 }
 

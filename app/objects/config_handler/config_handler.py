@@ -9,7 +9,6 @@ def set_path(path):
 def get_config():
     if ConfigHandler.SELF is None:
         ConfigHandler.SELF = ConfigHandler()
-    print(ConfigHandler.SELF.INTERNET_CHECK_LOG)
     return ConfigHandler.SELF
 
 
