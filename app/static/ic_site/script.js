@@ -213,20 +213,19 @@ var SpeedStatus = {
     },
 
     saveDataToTable: function (table_data) {
-        //Dates
-        document.getElementById("all_start_date").innerHTML = Utils.dateToShortStr(table_data["all_start_date"]);
-        document.getElementById("all_end_date").innerHTML = Utils.dateToShortStr(table_data["all_end_date"]);
-        document.getElementById("month_start_date").innerHTML = Utils.dateToShortStr(table_data["month_start_date"]);
-        document.getElementById("month_end_date").innerHTML = Utils.dateToShortStr(table_data["month_end_date"]);
-        //Max and avg
-        document.getElementById("all_max_upload").innerHTML = Math.max.apply(Math, all_values['upload']) + " Mb/s";
-        document.getElementById("all_max_download").innerHTML = Math.max.apply(Math, all_values['download']) + " Mb/s";
-        document.getElementById("all_avg_upload").innerHTML = this.get_avg(all_values['upload']) + " Mb/s";
-        document.getElementById("all_avg_download").innerHTML = this.get_avg(all_values['download']) + " Mb/s";
-        document.getElementById("month_max_upload").innerHTML = Math.max.apply(Math, month_values['upload']) + " Mb/s";
-        document.getElementById("month_max_download").innerHTML = Math.max.apply(Math, month_values['download']) + " Mb/s";
-        document.getElementById("month_avg_upload").innerHTML = this.get_avg(month_values['upload']) + " Mb/s";
-        document.getElementById("month_avg_download").innerHTML = this.get_avg(month_values['download']) + " Mb/s";
+        console.log(table_data);
+        for (const name of ["all", "month"]) {
+            //Dates
+            document.getElementById(name + "_start_date").innerHTML = Utils.dateToShortStr(table_data[name + "_start_date"]);
+            document.getElementById(name + "_end_date").innerHTML = Utils.dateToShortStr(table_data[name + "_end_date"]);
+
+            //Max and avg
+            for (const method of ["upload", "download"]) {
+                document.getElementById(name + "_max_" + method).innerHTML = Math.max.apply(Math, table_data[name][method]) + " Mb/s";
+                document.getElementById(name + "_avg_" + method).innerHTML = this.get_avg(table_data[name][method]) + " Mb/s";
+            }
+        }
+
 
     },
 
@@ -242,6 +241,7 @@ var SpeedStatus = {
         table_data["month_start_date"] = table_data["all_end_date"];
         table_data["month_end_date"] = table_data["all_end_date"];
         for (let i = 0; i < data_collection["upload"].length; i++) {
+            //If value is newer than one month
             if (table_data["month_start_date"] > data_collection["upload"][i]["x"] && table_data["all_end_date"].clone().add(-1, 'month') < (data_collection["upload"][i]["x"])) {
                 table_data["month_start_date"] = data_collection["upload"][i]["x"];
             }
@@ -252,6 +252,9 @@ var SpeedStatus = {
             all_values['upload'].push(data_collection["upload"][i]["y"]);
             all_values['download'].push(data_collection["download"][i]["y"]);
         }
+        table_data["all"] = all_values;
+        table_data["month"] = month_values;
+
         this.saveDataToTable(table_data);
 
     },
@@ -356,13 +359,24 @@ var InternetStatus = {
             }
 
         }
-        duration['all']['sum'] = moment.duration(duration['all'][true] + duration['all'][false]);
-        duration['month']['sum'] = moment.duration(duration['month'][true] + duration['month'][false]);
-        duration['all'][true] = moment.duration(duration['all'][true])
-        duration['all'][false] = moment.duration(duration['all'][false])
-        duration['month'][true] = moment.duration(duration['month'][true])
-        duration['month'][false] = moment.duration(duration['month'][false])
 
+        for (const name of ["all", "month"]) {
+            //sum
+            duration[name]['sum'] = moment.duration(duration[name][true] + duration[name][false]);
+            //Duration of statuses
+            for (const status of [true, false]) {
+                duration[name][status] = moment.duration(duration[name][status])
+            }
+            // Values per cent
+            duration[name]['percent'] = {}
+            for (const status of [true, false]) {
+                dur_in_percent = 0.00;
+                if (duration[name][status]) {
+                    dur_in_percent = Math.round((duration[name][true] + duration[name][false]) / duration[name][status] * 100 * 100) / 100;
+                }
+                duration[name]["percent"][status] = dur_in_percent;
+            }
+        }
         return duration;
     },
 
@@ -376,18 +390,16 @@ var InternetStatus = {
     },
 
     writeDataToTable: function (duration, json_data) {
-        document.getElementById("all_true_duration_msg").innerHTML = this.getMsgFromDuration(duration["all"][true]);
-        document.getElementById("all_false_duration_msg").innerHTML = this.getMsgFromDuration(duration["all"][false]);
-        document.getElementById("month_true_duration_msg").innerHTML = this.getMsgFromDuration(duration["month"][true]);
-        document.getElementById("month_false_duration_msg").innerHTML = this.getMsgFromDuration(duration["month"][false]);
-
-        document.getElementById("month_duration_msg").innerHTML = this.getMsgFromDuration(duration["month"]["sum"]);
-        document.getElementById("all_duration_msg").innerHTML = this.getMsgFromDuration(duration["all"]["sum"]);
+        for (const name of ["all", "month"]) {
+            document.getElementById(name + "_end").innerHTML = Utils.dateToShortStr(json_data["end_date"][0]);
+            document.getElementById(name + "_duration_msg").innerHTML = this.getMsgFromDuration(duration[name]["sum"]);
+            document.getElementById(name + "_true_duration_msg").innerHTML = this.getMsgFromDuration(duration[name][true]);
+            document.getElementById(name + "_false_duration_msg").innerHTML = this.getMsgFromDuration(duration[name][false]);
+        }
 
         document.getElementById("all_start").innerHTML = Utils.dateToShortStr(json_data["start_date"].slice(-1)[0]);
-        document.getElementById("all_end").innerHTML = Utils.dateToShortStr(json_data["end_date"][0]);
         document.getElementById("month_start").innerHTML = Utils.dateToShortStr(json_data["end_date"][0].clone().add(-1, "month"));
-        document.getElementById("month_end").innerHTML = Utils.dateToShortStr(json_data["end_date"][0]);
+
 
     },
 
