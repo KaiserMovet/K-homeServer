@@ -23,10 +23,13 @@ var MainMsg = {
         el.innerHTML = msg;
     },
 
-    setStatus: function (status) {
+    setStatus: function (status, last_date) {
         main_msg = document.getElementById("main_msg");
         last_speed = document.getElementById("last_speed");
         status_msg = document.getElementById("current_status");
+        document.getElementById("last_time").innerHTML = Utils.dateToFullStr(last_date);
+        document.getElementById("last_time").setAttribute("updated", true);
+
         this.setEmoji(status);
         if (status) {
             main_msg.classList.remove("alert-danger");
@@ -58,7 +61,6 @@ var TableGenerator = {
         return (data_list.reduce((a, b) => a + b, 0) / data_list.length);
     },
     addRow: function (table, id, background = false, name_button = false, parent_row = false) {
-        //row = ($(table.append('<tr>')));
         row = $('<tr></tr>');
         row.attr('id', id);
         row.attr("onClick", "SpeedStatus.zoomChart('" + id + "')")
@@ -77,7 +79,7 @@ var TableGenerator = {
         if (name_button) {
             button = $('<button></button>');
             button.attr('id', "name");
-            button.addClass("btn btn-info");
+            button.addClass("btn btn-info btn-sm");
             button.attr("data-toggle", "collapse");
             collapse_id = "collapse_" + id;
             button.attr("data-target", "." + collapse_id);
@@ -123,11 +125,8 @@ var TableGenerator = {
         for (const year of Object.keys(js_data["months"]).reverse()) {
             //Year
             parent_row = this.getOrCreateRow(table, year, background = true, name_button = true);
-            console.log(parent_row);
             for (const month of Object.keys(js_data["months"][year]).reverse()) {
                 //Month
-                console.log(parent_row);
-
                 id = this.get_id_of_row(js_data["months"][year][month]["start_date"]);
                 this.getOrCreateRow(table, id, background = false, name_button = false, parent_row = parent_row);
             }
@@ -295,7 +294,6 @@ var SpeedStatus = {
                 pan: {
                     enabled: true,
                     mode: 'x',
-                    // TODO: Add Boundries
                     rangeMin: {
                         x: null,
                         y: null
@@ -311,7 +309,6 @@ var SpeedStatus = {
                     enabled: true,
                     drag: false,
                     mode: 'x',
-                    // TODO: Add Boundries
                     rangeMin: {
                         x: null,
                         y: null
@@ -428,14 +425,10 @@ var SpeedStatus = {
 
     prepareBoundries: function (data_collection) {
         var boundry_id = this.getData("boundry_mode");
-        console.log(boundry_id);
         target_row = $("#speed_table").find("#" + boundry_id);
-
-        console.log(start_date);
 
         start_date = moment(target_row.find("#start_date").html(), "YYYY.MM.DD");
         end_date = moment(target_row.find("#end_date").html(), "YYYY.MM.DD");
-        console.log(start_date);
         start_date.add(-1, 'days');
         end_date.add(1, 'days');
         return { "start_date": start_date, "end_date": end_date };
@@ -511,7 +504,6 @@ var SpeedStatus = {
     },
 
     zoomChart: function (id = "all") {
-        console.log(id);
         this.setData("boundry_mode", id);
         this.refresh()
     }
@@ -653,7 +645,7 @@ var InternetStatus = {
     refresh: function () {
         json_data = this.getJsonData();
         last_duration_msg = json_data["status"][0]
-        MainMsg.setStatus(json_data["status"][0], "");
+        MainMsg.setStatus(json_data["status"][0], json_data["end_date"][0]);
         this.generate_logs(json_data);
         this.prepare_table(json_data);
     },
@@ -675,8 +667,8 @@ var DataProvider = {
 
     refresh: function () {
         local = window.location.origin;
-        //TODO REMOVE
-        local = "http://nanopi:5000";
+        //TODO Remove
+        local = "http://nanopi:5000"
         url_internet_status = local + "/api/internet_status";
         url_internet_speed = local + "/api/internet_speed";
 
@@ -721,19 +713,53 @@ var Utils = {
         bar.setAttribute("data_refresh", data_refresh);
     },
 
-    refresh: function () {
-        // setTimeout(Utils.refresh, 1000);
-        bar = document.getElementById("autorefresh_bar");
-        if (bar.getAttribute("data_refresh") == 'false') {
-            return;
+    refreshDuration: function () {
+        last_date = moment(document.getElementById("last_time").innerHTML, "YYYY.MM.DD - HH:mm:ss");
+        console.log(last_date);
+        if (last_date.isValid()) {
+            last_date.add(5, "minutes");
+            last_date.add(15, "seconds");
+        } else {
+            last_date = moment().add(5, "seconds");
         }
-        all_sec = 60 * 1;
+        duration = moment.duration(moment().diff(last_date));
+        sec_dur = duration.asSeconds();
+        console.log(sec_dur);
+        sec_dur = -sec_dur;
+        if (sec_dur <= 0) {
+            sec_dur = 5;
+        }
+        sec_dur = Math.round(sec_dur);
+        bar = document.getElementById("autorefresh_bar");
+        bar.setAttribute('aria-valuemax', sec_dur);
+        return sec_dur;
+    },
+
+    refresh: function () {
+        setTimeout(Utils.refresh, 1000);
+
+
+        bar = document.getElementById("autorefresh_bar");
+        //Get sec to next change
+        all_sec = bar.getAttribute('aria-valuemax');
         current_sec = bar.getAttribute("data_time");
         current_sec -= 1;
         if (current_sec < 0) {
-            current_sec = all_sec;
+            if (bar.getAttribute("data_refresh") == 'false') {
+                return;
+            }
             DataProvider.refresh();
+            //Block refreshing until duration will be updated
+            current_sec = 1;
+
         }
+        //Refresh duration time, after api get data about last check
+        if (document.getElementById("last_time").getAttribute("updated") == "true") {
+            document.getElementById("last_time").setAttribute("updated", false);
+            all_sec = Utils.refreshDuration();
+            current_sec = all_sec;
+        }
+
         bar.setAttribute("data_time", current_sec);
         bar.innerHTML = current_sec + "s"
         percent = (all_sec - current_sec) * 100 / all_sec
