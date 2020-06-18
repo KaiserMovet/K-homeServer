@@ -513,7 +513,7 @@ var SpeedStatus = {
 var InternetStatus = {
 
     getMsgFromDuration: function (duration) {
-        days = Math.round(duration.as('days'));
+        days = Math.floor(duration.as('days'));
         hours = duration.hours();
         minutes = duration.minutes();
         duration_msg = days + " days, " + hours + " hours and " + minutes + " minutes.";
