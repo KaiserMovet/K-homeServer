@@ -667,8 +667,7 @@ var DataProvider = {
 
     refresh: function () {
         local = window.location.origin;
-        //TODO Remove
-        local = "http://nanopi:5000"
+        //local = "http://nanopi:5000"
         url_internet_status = local + "/api/internet_status";
         url_internet_speed = local + "/api/internet_speed";
 
