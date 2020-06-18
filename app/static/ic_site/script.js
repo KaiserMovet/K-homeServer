@@ -44,8 +44,245 @@ var MainMsg = {
     },
 
 }
+var TableGenerator = {
+    get_id_of_row: function (date) {
+        year = date.year();
+        month = date.month();
+        return year + "_" + month;
+    },
+    get_max: function (data_list) {
+        return Math.max.apply(Math, data_list)
+    },
+
+    get_avg: function (data_list) {
+        return (data_list.reduce((a, b) => a + b, 0) / data_list.length);
+    },
+    addRow: function (table, id, background = false, name_button = false, parent_row = false) {
+        //row = ($(table.append('<tr>')));
+        row = $('<tr></tr>');
+        row.attr('id', id);
+        row.attr("onClick", "SpeedStatus.zoomChart('" + id + "')")
+        if (background) {
+            row.addClass("table-primary");
+        }
+        if (parent_row) {
+            parent_id = parent_row.attr("id");
+            row.addClass("collapse_" + parent_id);
+            row.addClass("collapse");
+
+        }
+
+        cell = $('<td></td>');
+        row.append(cell);
+        if (name_button) {
+            button = $('<button></button>');
+            button.attr('id', "name");
+            button.addClass("btn btn-info");
+            button.attr("data-toggle", "collapse");
+            collapse_id = "collapse_" + id;
+            button.attr("data-target", "." + collapse_id);
+
+            cell.append(button);
+
+        } else {
+            cell.attr('id', "name");
+        }
+
+        for (const name of ["start_date", "end_date", "max_upload", "max_download", "avg_upload", "avg_download"]) {
+            cell = $('<td></td>');
+            cell.attr('id', name);
+            row.append(cell);
+        }
+        table.append(row);
+        return row;
+    },
+
+    getOrCreateRow: function (table, id, background = false, name_button = false, parent_row = NaN) {
+        row = table.find('#' + id);
+        if (row.length == 0) {
+            this.addRow(table, id, background, name_button, parent_row);
+            row = table.find('#' + id);
+        }
+        return row;
+    },
+
+    addCollapseFunc: function (row) {
+
+    },
+
+    setValueOfCell: function (table, row_id, cell_id, value) {
+        table_id = table.getAttribute("id");
+        $("#" + table_id).find('#' + row_id).find('#' + cell_id).html(value);
+    },
+
+    drawTable: function (js_data) {
+        table = $("#speed_table").find("tbody");
+        //All
+        this.getOrCreateRow(table, "all", background = true);
+
+        for (const year of Object.keys(js_data["months"]).reverse()) {
+            //Year
+            parent_row = this.getOrCreateRow(table, year, background = true, name_button = true);
+            console.log(parent_row);
+            for (const month of Object.keys(js_data["months"][year]).reverse()) {
+                //Month
+                console.log(parent_row);
+
+                id = this.get_id_of_row(js_data["months"][year][month]["start_date"]);
+                this.getOrCreateRow(table, id, background = false, name_button = false, parent_row = parent_row);
+            }
+        }
+    },
+
+    saveValuesToRow: function (table, id, js_data, name) {
+        this.setValueOfCell(table, id, "name", name);
+        for (const date of ["start_date", "end_date"]) {
+            this.setValueOfCell(table, id, date, Utils.dateToShortStr(js_data[date]));
+        }
+        for (const speed_val of ["max_upload", "max_download", "avg_upload", "avg_download"]) {
+            this.setValueOfCell(table, id, speed_val, js_data[speed_val].toFixed(1));
+        }
+    },
+
+    updateTable: function (js_data) {
+        table = document.getElementById("speed_table");
+        //All
+        this.saveValuesToRow(table, "all", js_data["all"], "All");
+
+        for (const year of Object.keys(js_data["months"]).reverse()) {
+            //Year
+            year_name = js_data["years"][year]["start_date"].year();
+            this.saveValuesToRow(table, year, js_data["years"][year], year_name);
+            for (const month of Object.keys(js_data["months"][year]).reverse()) {
+                //Month
+                month_name = js_data["months"][year][month]["start_date"].format('MMMM');
+                month_id = this.get_id_of_row(js_data["months"][year][month]["start_date"]);
+                this.saveValuesToRow(table, month_id, js_data["months"][year][month], month_name);
+            }
+        }
+
+    },
+    divide_data: function (js_data) {
+        divided_data = { "upload": {}, "download": {}, "start_date": {}, "end_date": {} };
+        year = js_data["upload"][0]["x"].year();
+        month = js_data["upload"][0]["x"].month();
+        //Year loop
+        for (let i = 0; i < js_data["upload"].length; i++) {
+            year = js_data["upload"][i]["x"].year();
+            month = js_data["upload"][i]["x"].month();
+            if (!(year in divided_data["upload"])) {
+                divided_data["upload"][year] = {};
+                divided_data["download"][year] = {};
+                divided_data["start_date"][year] = {};
+                divided_data["end_date"][year] = {};
+
+            }
+            if (!(month in divided_data["upload"][year])) {
+                divided_data["upload"][year][month] = [];
+                divided_data["download"][year][month] = [];
+                divided_data["start_date"][year][month] = moment("01-01-2100", "MM-DD-YYYY");
+                divided_data["end_date"][year][month] = moment("01-01-1900", "MM-DD-YYYY");
+            }
+            divided_data["upload"][year][month].push(js_data["upload"][i]["y"]);
+            divided_data["download"][year][month].push(js_data["download"][i]["y"]);
+            if (js_data["upload"][i]["x"] > divided_data["end_date"][year][month]) {
+                divided_data["end_date"][year][month] = js_data["upload"][i]["x"];
+            }
+            if (js_data["upload"][i]["x"] < divided_data["start_date"][year][month]) {
+                divided_data["start_date"][year][month] = js_data["upload"][i]["x"];
+            }
+        }
+        return divided_data;
+    },
+
+    calculateStatsForMonth: function (year, month, data, data_year, stats) {
+        row_data = {};
+        row_data["start_date"] = data["start_date"][year][month];
+        row_data["end_date"] = data["end_date"][year][month];
+
+        row_data["max_upload"] = this.get_max(data["upload"][year][month]);
+        row_data["max_download"] = this.get_max(data["download"][year][month]);
+        row_data["avg_upload"] = this.get_avg(data["upload"][year][month]);
+        row_data["avg_download"] = this.get_avg(data["download"][year][month]);
+
+        if (data_year["start_date"] > row_data["start_date"]) {
+            data_year["start_date"] = row_data["start_date"];
+        }
+        if (data_year["end_date"] < row_data["end_date"]) {
+            data_year["end_date"] = row_data["end_date"];
+        }
+        data_year["max_upload"].push(row_data["max_upload"]);
+        data_year["max_download"].push(row_data["max_download"]);
+        data_year["avg_upload"].push(row_data["avg_upload"]);
+        data_year["avg_download"].push(row_data["avg_download"]);
+        stats["months"][year][month] = row_data;
+    },
+    calculateStatsForYear: function (data_year, stats, year, data_all) {
+        year_row = {};
+        year_row["start_date"] = data_year["start_date"];
+        year_row["end_date"] = data_year["end_date"];
+        year_row["max_upload"] = this.get_max(data_year["max_upload"]);
+        year_row["max_download"] = this.get_max(data_year["max_download"]);
+        year_row["avg_upload"] = this.get_avg(data_year["avg_upload"]);
+        year_row["avg_download"] = this.get_avg(data_year["avg_download"]);
+
+        if (data_all["start_date"] > year_row["start_date"]) {
+            data_all["start_date"] = year_row["start_date"];
+        }
+        if (data_all["end_date"] < year_row["end_date"]) {
+            data_all["end_date"] = year_row["end_date"];
+        }
+        data_all["max_upload"].push(year_row["max_upload"]);
+        data_all["max_download"].push(year_row["max_download"]);
+        data_all["avg_upload"].push(year_row["avg_upload"]);
+        data_all["avg_download"].push(year_row["avg_download"]);
+
+        stats["years"][year] = year_row;
+    },
+
+    calculateStatsForAll: function (stats, data_all) {
+        all_row = {};
+        all_row["start_date"] = data_all["start_date"];
+        all_row["end_date"] = data_all["end_date"];
+        all_row["max_upload"] = this.get_max(data_all["max_upload"]);
+        all_row["max_download"] = this.get_max(data_all["max_download"]);
+        all_row["avg_upload"] = this.get_avg(data_all["avg_upload"]);
+        all_row["avg_download"] = this.get_avg(data_all["avg_download"]);
+        stats["all"] = all_row;
+    },
+    calculate_statistics: function (data) {
+        stats = {};
+        stats["all"] = {};
+        stats["years"] = {};
+        stats["months"] = {};
+        data_all = { "start_date": moment("01-01-2100", "MM-DD-YYYY"), "end_date": moment("01-01-1900", "MM-DD-YYYY"), "max_upload": [], "max_download": [], "avg_upload": [], "avg_download": [] };
+        for (const year of Object.keys(data["upload"])) {
+            stats["months"][year] = {};
+            data_year = { "start_date": moment("01-01-2100", "MM-DD-YYYY"), "end_date": moment("01-01-1900", "MM-DD-YYYY"), "max_upload": [], "max_download": [], "avg_upload": [], "avg_download": [] };
+            for (const month of Object.keys(data["upload"][year])) {
+                this.calculateStatsForMonth(year, month, data, data_year, stats);
+            }
+            this.calculateStatsForYear(data_year, stats, year, data_all);
+        }
+        this.calculateStatsForAll(stats, data_all);
+        return stats;
+    },
+
+    init: function (js_data) {
+        el = document.getElementById("speed_table")
+        if (el.rows > 0) {
+
+        }
+        divided_data = this.divide_data(js_data);
+        stats = this.calculate_statistics(divided_data);
+        this.drawTable(stats);
+        this.updateTable(stats);
+    }
+}
 
 var SpeedStatus = {
+
+
 
     strToMoment: function (date) {
         return moment(date,
@@ -190,15 +427,15 @@ var SpeedStatus = {
     },
 
     prepareBoundries: function (data_collection) {
-        var boundry_mode = this.getData("boundry_mode");
+        var boundry_id = this.getData("boundry_mode");
+        console.log(boundry_id);
+        target_row = $("#speed_table").find("#" + boundry_id);
 
-        if (boundry_mode == "month") {
-            start_date = moment(document.getElementById("month_start_date").innerHTML, "YYYY.MM.DD")
-        } else {
-            start_date = moment(document.getElementById("all_start_date").innerHTML, "YYYY.MM.DD")
-        }
-        end_date = data_collection["upload"][0]['x'].clone();
+        console.log(start_date);
 
+        start_date = moment(target_row.find("#start_date").html(), "YYYY.MM.DD");
+        end_date = moment(target_row.find("#end_date").html(), "YYYY.MM.DD");
+        console.log(start_date);
         start_date.add(-1, 'days');
         end_date.add(1, 'days');
         return { "start_date": start_date, "end_date": end_date };
@@ -221,17 +458,17 @@ var SpeedStatus = {
     },
 
     saveDataToTable: function (table_data) {
-        for (const name of ["all", "month"]) {
-            //Dates
-            document.getElementById(name + "_start_date").innerHTML = Utils.dateToShortStr(table_data[name + "_start_date"]);
-            document.getElementById(name + "_end_date").innerHTML = Utils.dateToShortStr(table_data[name + "_end_date"]);
+        // for (const name of ["all", "month"]) {
+        //     //Dates
+        //     document.getElementById(name + "_start_date").innerHTML = Utils.dateToShortStr(table_data[name + "_start_date"]);
+        //     document.getElementById(name + "_end_date").innerHTML = Utils.dateToShortStr(table_data[name + "_end_date"]);
 
-            //Max and avg
-            for (const method of ["upload", "download"]) {
-                document.getElementById(name + "_max_" + method).innerHTML = Math.max.apply(Math, table_data[name][method]) + " Mb/s";
-                document.getElementById(name + "_avg_" + method).innerHTML = this.get_avg(table_data[name][method]) + " Mb/s";
-            }
-        }
+        //     //Max and avg
+        //     for (const method of ["upload", "download"]) {
+        //         document.getElementById(name + "_max_" + method).innerHTML = Math.max.apply(Math, table_data[name][method]) + " Mb/s";
+        //         document.getElementById(name + "_avg_" + method).innerHTML = this.get_avg(table_data[name][method]) + " Mb/s";
+        //     }
+        // }
 
 
     },
@@ -263,31 +500,19 @@ var SpeedStatus = {
         table_data["month"] = month_values;
 
         this.saveDataToTable(table_data);
-
     },
 
     refresh: function () {
         var data_collection = this.getJsonData();
         MainMsg.setSpeed(data_collection["upload"][0]["y"], data_collection["download"][0]["y"]);
-        this.refreshTable(data_collection);
+        TableGenerator.init(data_collection);
         this.resizeCanvas();
         this.drawChar(data_collection);
     },
 
-    zoomChart: function (name) {
-        if (name == "") {
-            name = "all";
-        }
-        this.setData("boundry_mode", name);
-        if (name == "all") {
-            document.getElementById("all_dates").classList.add('table-primary');
-            document.getElementById("month_dates").classList.remove('table-primary');
-
-        } else {
-            document.getElementById("month_dates").classList.add('table-primary');
-            document.getElementById("all_dates").classList.remove('table-primary');
-        }
-
+    zoomChart: function (id = "all") {
+        console.log(id);
+        this.setData("boundry_mode", id);
         this.refresh()
     }
 
@@ -346,7 +571,6 @@ var InternetStatus = {
         logs.innerHTML = "";
         //MainMSG
         duration = moment.duration(json_data["end_date"][0].diff(json_data["start_date"][0]));
-        console.log(duration)
         duration_msg = this.getMsgFromDuration(duration);
         MainMsg.setCurrentLength(duration_msg, json_data["status"][0]);
         //Logs
@@ -451,6 +675,8 @@ var DataProvider = {
 
     refresh: function () {
         local = window.location.origin;
+        //TODO REMOVE
+        local = "http://nanopi:5000";
         url_internet_status = local + "/api/internet_status";
         url_internet_speed = local + "/api/internet_speed";
 
@@ -461,6 +687,7 @@ var DataProvider = {
         });
         client.get(url_internet_speed, function (response) {
             SpeedStatus.setData("data_json", response);
+            SpeedStatus.zoomChart();
             SpeedStatus.refresh();
         });
     },
@@ -495,7 +722,7 @@ var Utils = {
     },
 
     refresh: function () {
-        setTimeout(Utils.refresh, 1000);
+        // setTimeout(Utils.refresh, 1000);
         bar = document.getElementById("autorefresh_bar");
         if (bar.getAttribute("data_refresh") == 'false') {
             return;

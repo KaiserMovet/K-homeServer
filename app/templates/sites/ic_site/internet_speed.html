@@ -3,30 +3,16 @@
 </script>
 <canvas id="myChart" width="400" height="100" , log_date_list="" log_download_list="" log_upload_list=""></canvas>
 
-<table class="table">
+<table class="table" id="speed_table">
     <thead>
-        <tr>
-            <th scope="col">#</th>
-            <th scope="col">From</th>
-            <th scope="col">To</th>
-            <th scope="col">Max upload</th>
-            <th scope="col">Max download</th>
-            <th scope="col">Avg upload</th>
-            <th scope="col">Avg download</th>
-
-        </tr>
+        <th scope="col">#</th>
+        <th scope="col">From</th>
+        <th scope="col">To</th>
+        <th scope="col">Max upload</th>
+        <th scope="col">Max download</th>
+        <th scope="col">Avg upload</th>
+        <th scope="col">Avg download</th>
     </thead>
     <tbody>
-        {% for name in ["all", "month"] %}
-        <tr id="{{name}}_dates" onClick="SpeedStatus.zoomChart('{{name}}')">
-            <td scope="col">{{name}}</td>
-            <td scope="col" id="{{name}}_start_date"></td>
-            <td scope="col" id="{{name}}_end_date"></td>
-            <td scope="col" id="{{name}}_max_upload"></td>
-            <td scope="col" id="{{name}}_max_download"></td>
-            <td scope="col" id="{{name}}_avg_upload"></td>
-            <td scope="col" id="{{name}}_avg_download"></td>
-        </tr>
-        {% endfor %}
     </tbody>
 </table>
