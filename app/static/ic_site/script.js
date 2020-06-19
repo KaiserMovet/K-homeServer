@@ -402,9 +402,9 @@ var SpeedStatus = {
     },
 
     resizeCanvas: function () {
-        // var ctx = SpeedStatus.getChart();
-        // ctx.width = window.innerWidth * 90 / 100;
-        // ctx.height = window.innerHeight * 40 / 100;
+        var ctx = SpeedStatus.getChart();
+        ctx.width(window.innerWidth * 90 / 100);
+        ctx.height(window.innerHeight * 40 / 100);
     },
 
     getJsonData: function () {
@@ -463,7 +463,7 @@ var SpeedStatus = {
         var data_collection = this.getJsonData();
         MainMsg.setSpeed(data_collection["upload"][0]["y"], data_collection["download"][0]["y"]);
         TableGenerator.init(data_collection);
-        //this.resizeCanvas();
+        this.resizeCanvas();
         this.drawChar(data_collection);
     },
 
