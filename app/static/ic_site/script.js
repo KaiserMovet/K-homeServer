@@ -292,7 +292,7 @@ var SpeedStatus = {
         plugins = {
             zoom: {
                 pan: {
-                    enabled: true,
+                    enabled: false,
                     mode: 'x',
                     rangeMin: {
                         x: null,
@@ -320,6 +320,9 @@ var SpeedStatus = {
                     speed: 0.1,
                     threshold: 2,
                     sensitivity: 3,
+                    onZoom: function ({ chart }) { console.log(`I'm zooming!!!`); },
+                    // Function called once zooming is completed
+                    onZoomComplete: function ({ chart }) { console.log(`I was zoomed!!!`); }
                 }
             }
         };
