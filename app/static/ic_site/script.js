@@ -292,7 +292,7 @@ var SpeedStatus = {
         plugins = {
             zoom: {
                 pan: {
-                    enabled: false,
+                    enabled: true,
                     mode: 'x',
                     rangeMin: {
                         x: null,
@@ -304,6 +304,10 @@ var SpeedStatus = {
                     },
                     speed: 20,
                     threshold: 10,
+                    // Function called while the user is panning
+                    onPan: function ({ chart }) { console.log(`I'm panning!!!`); },
+                    // Function called once panning is completed
+                    onPanComplete: function ({ chart }) { console.log(`I was panned!!!`); }
                 },
                 zoom: {
                     enabled: true,
