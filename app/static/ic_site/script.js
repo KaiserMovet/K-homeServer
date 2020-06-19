@@ -383,7 +383,7 @@ var SpeedStatus = {
     },
 
     getChart: function () {
-        return document.getElementById('myChart');
+        return $('#myChart');
     },
 
     setData: function (name, data) {
@@ -402,9 +402,9 @@ var SpeedStatus = {
     },
 
     resizeCanvas: function () {
-        var ctx = SpeedStatus.getChart();
-        ctx.width = window.innerWidth * 90 / 100;
-        ctx.height = window.innerHeight * 40 / 100;
+        // var ctx = SpeedStatus.getChart();
+        // ctx.width = window.innerWidth * 90 / 100;
+        // ctx.height = window.innerHeight * 40 / 100;
     },
 
     getJsonData: function () {
@@ -423,8 +423,11 @@ var SpeedStatus = {
         return parsed_data;
     },
 
-    prepareBoundries: function (data_collection) {
+    prepareBoundries: function () {
         var boundry_id = this.getData("boundry_mode");
+        if (boundry_id == "") {
+            boundry_id = "all";
+        }
         target_row = $("#speed_table").find("#" + boundry_id);
 
         start_date = moment(target_row.find("#start_date").html(), "YYYY.MM.DD");
@@ -436,18 +439,21 @@ var SpeedStatus = {
 
 
     drawChar: function (data_collection) {
-        var mc = SpeedStatus.getChart();
-        var ctx = mc.getContext('2d');
-
+        var ctx = this.getChart();
         //Dates
-        data_values = this.prepareBoundries(data_collection);
+        data_values = this.prepareBoundries();
         start_date = data_values["start_date"];
         end_date = data_values["end_date"];
-        var graph = $('#2d').data('2d');
+        var graph = $('#2d').data('graph');
         if (graph) {
-            graph.destroy();
+            graph.options.data.datasets[0].data = data_collection["upload"];
+            graph.options.data.datasets[1].data = data_collection["download"];
+            graph.update();
+
+        } else {
+            char = this.createChartObj(ctx, data_collection, start_date, end_date);
+            ctx.data('graph', char);
         }
-        char = this.createChartObj(ctx, data_collection, start_date, end_date);
     },
 
     get_avg: function (data_list) {
@@ -458,13 +464,21 @@ var SpeedStatus = {
         var data_collection = this.getJsonData();
         MainMsg.setSpeed(data_collection["upload"][0]["y"], data_collection["download"][0]["y"]);
         TableGenerator.init(data_collection);
-        this.resizeCanvas();
+        //this.resizeCanvas();
         this.drawChar(data_collection);
     },
 
     zoomChart: function (id = "all") {
+        var graph = $('#myChart').data('graph');
+        if (!graph) {
+            return;
+        }
         this.setData("boundry_mode", id);
-        this.refresh()
+        bounds = this.prepareBoundries()
+        graph.options.scales['xAxes'][0]['ticks']['min'] = bounds["start_date"];
+        graph.options.scales['xAxes'][0]['ticks']['max'] = bounds["end_date"];
+        graph.update();
+        //this.refresh()
     }
 
 }
@@ -637,7 +651,7 @@ var DataProvider = {
         });
         client.get(url_internet_speed, function (response) {
             SpeedStatus.setData("data_json", response);
-            SpeedStatus.zoomChart();
+            //SpeedStatus.zoomChart();
             SpeedStatus.refresh();
         });
     },
