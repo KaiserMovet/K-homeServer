@@ -334,7 +334,7 @@ var SpeedStatus = {
     },
 
     createChartObj: function (ctx, data_collection, start_date, end_date) {
-        new Chart(ctx, {
+        return new Chart(ctx, {
             type: 'line',
             label: "MB",
             options: {
@@ -441,6 +441,7 @@ var SpeedStatus = {
         return { "start_date": start_date, "end_date": end_date };
     },
 
+
     drawChar: function (data_collection) {
         var mc = SpeedStatus.getChart();
         var ctx = mc.getContext('2d');
@@ -449,8 +450,12 @@ var SpeedStatus = {
         data_values = this.prepareBoundries(data_collection);
         start_date = data_values["start_date"];
         end_date = data_values["end_date"];
-
-        this.createChartObj(ctx, data_collection, start_date, end_date);
+        var graph = $('#2d').data('2d');
+        if (graph) {
+            graph.destroy();
+        }
+        char = this.createChartObj(ctx, data_collection, start_date, end_date);
+        console.log(char);
     },
 
     get_avg: function (data_list) {
