@@ -445,8 +445,8 @@ var SpeedStatus = {
         end_date = data_values["end_date"];
         var graph = ctx.data('graph');
         if (graph) {
-            graph.options.data.datasets[0].data = data_collection["upload"];
-            graph.options.data.datasets[1].data = data_collection["download"];
+            graph.data.datasets[0].data = data_collection["upload"];
+            graph.data.datasets[1].data = data_collection["download"];
             graph.update();
 
         } else {
