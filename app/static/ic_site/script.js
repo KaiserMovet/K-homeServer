@@ -454,51 +454,6 @@ var SpeedStatus = {
         return (data_list.reduce((a, b) => a + b, 0) / data_list.length).toFixed(1);
     },
 
-    saveDataToTable: function (table_data) {
-        // for (const name of ["all", "month"]) {
-        //     //Dates
-        //     document.getElementById(name + "_start_date").innerHTML = Utils.dateToShortStr(table_data[name + "_start_date"]);
-        //     document.getElementById(name + "_end_date").innerHTML = Utils.dateToShortStr(table_data[name + "_end_date"]);
-
-        //     //Max and avg
-        //     for (const method of ["upload", "download"]) {
-        //         document.getElementById(name + "_max_" + method).innerHTML = Math.max.apply(Math, table_data[name][method]) + " Mb/s";
-        //         document.getElementById(name + "_avg_" + method).innerHTML = this.get_avg(table_data[name][method]) + " Mb/s";
-        //     }
-        // }
-
-
-    },
-
-    refreshTable: function (data_collection) {
-        all_values = { 'upload': [], 'download': [] };
-        month_values = { 'upload': [], 'download': [] };
-
-        table_data = {};
-        table_data["all_start_date"] =
-            data_collection["upload"].slice(-1)[0]["x"];
-        table_data["all_end_date"] =
-            data_collection["upload"][0]["x"];
-        table_data["month_start_date"] = table_data["all_end_date"];
-        table_data["month_end_date"] = table_data["all_end_date"];
-        for (let i = 0; i < data_collection["upload"].length; i++) {
-            //If value is newer than one month
-            if (table_data["month_start_date"] > data_collection["upload"][i]["x"] && table_data["all_end_date"].clone().add(-1, 'month') < (data_collection["upload"][i]["x"])) {
-                table_data["month_start_date"] = data_collection["upload"][i]["x"];
-            }
-            if (data_collection["upload"][i]["x"] > table_data["all_end_date"].clone().add(-1, 'month')) {
-                month_values['upload'].push(data_collection["upload"][i]["y"]);
-                month_values['download'].push(data_collection["download"][i]["y"]);
-            }
-            all_values['upload'].push(data_collection["upload"][i]["y"]);
-            all_values['download'].push(data_collection["download"][i]["y"]);
-        }
-        table_data["all"] = all_values;
-        table_data["month"] = month_values;
-
-        this.saveDataToTable(table_data);
-    },
-
     refresh: function () {
         var data_collection = this.getJsonData();
         MainMsg.setSpeed(data_collection["upload"][0]["y"], data_collection["download"][0]["y"]);
