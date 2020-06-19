@@ -304,10 +304,6 @@ var SpeedStatus = {
                     },
                     speed: 20,
                     threshold: 10,
-                    // Function called while the user is panning
-                    onPan: function ({ chart }) { console.log(`I'm panning!!!`); },
-                    // Function called once panning is completed
-                    onPanComplete: function ({ chart }) { console.log(`I was panned!!!`); }
                 },
                 zoom: {
                     enabled: true,
@@ -324,9 +320,6 @@ var SpeedStatus = {
                     speed: 0.1,
                     threshold: 2,
                     sensitivity: 3,
-                    onZoom: function ({ chart }) { console.log(`I'm zooming!!!`); },
-                    // Function called once zooming is completed
-                    onZoomComplete: function ({ chart }) { console.log(`I was zoomed!!!`); }
                 }
             }
         };
@@ -455,7 +448,6 @@ var SpeedStatus = {
             graph.destroy();
         }
         char = this.createChartObj(ctx, data_collection, start_date, end_date);
-        console.log(char);
     },
 
     get_avg: function (data_list) {
