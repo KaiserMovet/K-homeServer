@@ -331,6 +331,7 @@ var SpeedStatus = {
             type: 'line',
             label: "MB",
             options: {
+                responsive: true,
                 plugins: SpeedStatus.getPlugin(),
                 scales: {
                     yAxes: [{
@@ -402,9 +403,9 @@ var SpeedStatus = {
     },
 
     resizeCanvas: function () {
-        var ctx = SpeedStatus.getChart();
-        ctx.width(window.innerWidth * 90 / 100);
-        ctx.height(window.innerHeight * 40 / 100);
+        // var ctx = document.getElementById("myChart");
+        // ctx.width = window.innerWidth * 90 / 100;
+        // ctx.height = window.innerHeight * 40 / 100;
     },
 
     getJsonData: function () {
@@ -451,6 +452,7 @@ var SpeedStatus = {
 
         } else {
             char = this.createChartObj(ctx, data_collection, start_date, end_date);
+            this.resizeCanvas();
             ctx.data('graph', char);
         }
     },
@@ -463,7 +465,6 @@ var SpeedStatus = {
         var data_collection = this.getJsonData();
         MainMsg.setSpeed(data_collection["upload"][0]["y"], data_collection["download"][0]["y"]);
         TableGenerator.init(data_collection);
-        this.resizeCanvas();
         this.drawChar(data_collection);
     },
 
