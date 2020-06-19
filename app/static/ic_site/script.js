@@ -444,7 +444,7 @@ var SpeedStatus = {
         data_values = this.prepareBoundries();
         start_date = data_values["start_date"];
         end_date = data_values["end_date"];
-        var graph = $('#2d').data('graph');
+        var graph = ctx.data('graph');
         if (graph) {
             graph.options.data.datasets[0].data = data_collection["upload"];
             graph.options.data.datasets[1].data = data_collection["download"];
