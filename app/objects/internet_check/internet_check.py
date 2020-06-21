@@ -118,6 +118,8 @@ class LogCollection:
         if len(logs) == 0:
             return parsed_logs
         for previous_log, log in zip(logs[:-1], logs[1:]):
+            if not log:
+                continue
             start_time = cls._get_date(previous_log)
             end_time = cls._get_date(log)
             status = cls._get_status(log)
@@ -143,7 +145,6 @@ class LogCollection:
     @classmethod
     def _get_date(cls, line: str):
         line = line.replace("[", "]")
-        print(line)
         date_str = line.split("]")[1]
         date = datetime.strptime(date_str, cls.datetime_format)
         return date
