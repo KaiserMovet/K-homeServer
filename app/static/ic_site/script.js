@@ -324,11 +324,9 @@ var SpeedStatus = {
     },
 
     getPluginAnnotation: function (data_collection) {
-        console.log(data_collection);
         dates = [];
         dates.push(data_collection['download'][0]['x'].clone().add(1, 'month').startOf('month'));
         last_date = data_collection['download'].slice(-1)[0]['x'].clone().startOf('month');
-        console.log(last_date);
 
         while (true) {
             cur_date = dates.slice(-1)[0].clone().add(-1, 'month');
@@ -352,7 +350,7 @@ var SpeedStatus = {
                     position: "center",
                     content: date.format("MMMM YYYY"),
                     position: "right",
-                    xAdjust: 20,
+                    xAdjust: 35,
                 }
             };
             annotations.push(annotation);
@@ -368,7 +366,6 @@ var SpeedStatus = {
         plugins = {
             zoom: this.getPluginZoom(),
         };
-        console.log(plugins);
         return plugins;
     },
 
@@ -531,11 +528,194 @@ var SpeedStatus = {
 
 }
 
+var TableStatusGenerator = {
+    get_id_of_row: function (date) {
+        year = date.year();
+        month = date.month();
+        return year + "_" + month;
+    },
+
+    getTable: function () {
+        return $("#status_table");
+    },
+
+    addRow: function (table, id, background = false, name_button = false, parent_row = false) {
+        row = $('<tr></tr>');
+        row.attr('id', id);
+
+        if (parent_row) {
+            parent_id = parent_row.attr("id");
+            row.addClass("collapse_" + parent_id);
+            row.addClass("collapse");
+
+        }
+
+        cell = $('<td></td>');
+        row.append(cell);
+        if (name_button) {
+            button = $('<button></button>');
+            button.attr('id', "name");
+            button.addClass("btn btn-info btn-sm");
+            button.attr("data-toggle", "collapse");
+            collapse_id = "collapse_" + id;
+            button.attr("data-target", "." + collapse_id);
+
+            cell.append(button);
+
+        } else {
+            cell.attr('id', "name");
+        }
+        if (background) {
+            cell.addClass("table-primary");
+        }
+
+        for (const status of [true, false]) {
+            for (const name of ["days", "hours", "minutes"]) {
+                cell = $('<td></td>');
+                if (status) {
+                    cell.addClass("table-success");
+                }
+                else {
+                    cell.addClass("table-danger");
+                }
+                cell.attr('id', status + "_" + name);
+                row.append(cell);
+            }
+        }
+        table.append(row);
+        return row;
+    },
+
+    getOrCreateRow: function (table, id, background = false, name_button = false, parent_row = NaN) {
+        row = table.find('#' + id);
+        if (row.length == 0) {
+            this.addRow(table, id, background, name_button, parent_row);
+            row = table.find('#' + id);
+        }
+        return row;
+    },
+
+    getOrCreateRowBar: function (table, id, parent_row = NaN, background = false) {
+        row = table.find('#' + id + "_bar");
+        if (row.length) {
+            return;
+        }
+        if (row.length == 0) {
+            row = $('<tr></tr>');
+            if (background) {
+                row.addClass("table-primary");
+            }
+            row.attr('id', id + "_bar");
+            if (parent_row) {
+                parent_id = parent_row.attr("id");
+                row.addClass("collapse_" + parent_id);
+                row.addClass("collapse");
+            }
+            cell = $('<td></td>');
+            cell.attr("colspan", 7);
+            bars = $('<div></div>');
+            bars.attr("class", "progress");
+            true_bar = $('<div></div>');
+            true_bar.attr("id", id + "_bar_true");
+            true_bar.attr("class", "progress-bar bg-success");
+            true_bar.attr("style", "width: 50%");
+            false_bar = $('<div></div>');
+            false_bar.attr("id", id + "_bar_false");
+            false_bar.attr("class", "progress-bar bg-danger");
+            false_bar.attr("style", "width: 50%");
+            bars.append(true_bar);
+            bars.append(false_bar);
+            cell.append(bars);
+            row.append(cell);
+            table.append(row);
+        }
+        return row;
+    },
+
+    drawTable: function (js_data) {
+        table = this.getTable();
+        //All
+        this.getOrCreateRow(table, "all", background = true);
+        this.getOrCreateRowBar(table, "all", NaN, true);
+
+        for (const year of Object.keys(js_data["months"]).reverse()) {
+            //Year
+            parent_row = this.getOrCreateRow(table, year, background = true, name_button = true);
+            this.getOrCreateRowBar(table, year, NaN, true);
+
+            for (const month of Object.keys(js_data["months"][year]).reverse()) {
+                //Month
+                id = this.get_id_of_row(moment().year(year).month(month));
+                this.getOrCreateRow(table, id, background = false, name_button = false, parent_row = parent_row);
+                this.getOrCreateRowBar(table, id, parent_row);
+
+            }
+        }
+    },
+
+    setValueOfCell: function (table, row_id, cell_id, value) {
+        table.find('#' + row_id).find('#' + cell_id).html(value);
+    },
+
+    saveValuesToRow: function (table, id, js_data, name) {
+        this.setValueOfCell(table, id, "name", name);
+        for (const status of [true, false]) {
+            duration = moment.duration(js_data[status]);
+            days = Math.floor(duration.as('days'));
+            hours = duration.hours();
+            minutes = duration.minutes();
+            this.setValueOfCell(table, id, status + "_days", days);
+            this.setValueOfCell(table, id, status + "_hours", hours);
+            this.setValueOfCell(table, id, status + "_minutes", minutes);
+
+        }
+    },
+
+    updateBar(table, id, js_data) {
+        all_duration = js_data[true] + js_data[false];
+        true_percent = Math.round(js_data[true] * 100 / all_duration * 100) / 100;
+        false_percent = 100 - true_percent;
+        true_bar = table.find("#" + id + "_bar_true");
+        true_bar.attr("style", "width: " + true_percent + "%");
+        true_bar.html(true_percent + "%");
+        false_bar = table.find("#" + id + "_bar_false");
+        false_bar.attr("style", "width: " + false_percent + "%");
+        false_bar.html(false_percent + "%");
+
+    },
+
+    updateTable: function (js_data) {
+        table = this.getTable();
+        //All
+        this.saveValuesToRow(table, "all", js_data["all"], "All");
+        this.updateBar(table, "all", js_data["all"]);
+        for (const year of Object.keys(js_data["months"]).reverse()) {
+            //Year
+            year_name = year;
+            this.saveValuesToRow(table, year, js_data["years"][year], year_name);
+            this.updateBar(table, year, js_data["years"][year]);
+
+            for (const month of Object.keys(js_data["months"][year]).reverse()) {
+                //Month
+                month_name = moment().year(year).month(month).format('MMMM')
+                month_id = this.get_id_of_row(moment().year(year).month(month));
+                this.saveValuesToRow(table, month_id, js_data["months"][year][month], month_name);
+                this.updateBar(table, month_id, js_data["months"][year][month]);
+
+            }
+        }
+    },
+
+    init: function (json_table) {
+        this.drawTable(json_table);
+        this.updateTable(json_table);
+    }
+}
 var InternetStatus = {
 
     getMsgFromDuration: function (duration) {
         days = Math.floor(duration.as('days'));
-        hours = duration.hours();
+        hours = Math.floor(duration.hours());
         minutes = duration.minutes();
         duration_msg = days + " days, " + hours + " hours and " + minutes + " minutes.";
         return duration_msg;
@@ -663,9 +843,50 @@ var InternetStatus = {
         this.writeDataToTable(duration, json_data)
     },
 
+    calculateData: function (json_data) {
+        calculated_data = { "all": { true: 0, false: 0 }, "years": {}, "months": {} };
+        collection = [];
+
+        for (i = 0; i < json_data['end_date'].length; i++) {
+            end_date = json_data['end_date'][i].clone();
+            start_date = json_data['start_date'][i].clone();
+            status = json_data['status'][i];
+            repeat = false;
+            do {
+                year = end_date.clone().add(-1, "minute").year();
+                month = end_date.clone().add(-1, "minute").month();
+                if (end_date.clone().add(-1, "minute").isSame(start_date, 'month')) {
+                    current_start = start_date;
+                    repeat = false;
+                } else {
+                    current_start = end_date.clone().add(-1, "minute").startOf('month');
+                    repeat = true;
+                }
+                if (!(year in calculated_data["months"])) {
+                    calculated_data["months"][year] = {};
+                    calculated_data["years"][year] = { true: 0, false: 0 };
+                }
+                if (!(month in calculated_data["months"][year])) {
+                    calculated_data["months"][year][month] = { true: 0, false: 0 };
+                }
+
+                //duration
+                calculated_data["months"][year][month][status] += end_date.diff(current_start);
+                calculated_data["years"][year][status] += end_date.diff(current_start);
+                calculated_data["all"][status] += end_date.diff(current_start);
+
+                end_date = end_date.clone().add(-1, "minute").startOf('month');
+            } while (repeat);
+        }
+
+        return calculated_data;
+    },
+
     refresh: function () {
         json_data = this.getJsonData();
-        last_duration_msg = json_data["status"][0]
+        calculate_data = this.calculateData(json_data);
+        TableStatusGenerator.init(calculate_data);
+        last_duration_msg = json_data["status"][0];
         MainMsg.setStatus(json_data["status"][0], json_data["end_date"][0]);
         this.generate_logs(json_data);
         this.prepare_table(json_data);
