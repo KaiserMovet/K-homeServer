@@ -118,7 +118,6 @@ var TableGenerator = {
     },
 
     drawTable: function (js_data) {
-        console.log(js_data);
         table = $("#speed_table").find("tbody");
         //All
         this.getOrCreateRow(table, "today", background = true);
@@ -136,7 +135,6 @@ var TableGenerator = {
     },
 
     saveValuesToRow: function (table, id, js_data, name) {
-        console.log(js_data)
         this.setValueOfCell(table, id, "name", name);
         for (const date of ["start_date", "end_date"]) {
             this.setValueOfCell(table, id, date, Utils.dateToShortStr(js_data[date]));
