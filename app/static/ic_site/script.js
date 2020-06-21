@@ -118,8 +118,10 @@ var TableGenerator = {
     },
 
     drawTable: function (js_data) {
+        console.log(js_data);
         table = $("#speed_table").find("tbody");
         //All
+        this.getOrCreateRow(table, "today", background = true);
         this.getOrCreateRow(table, "all", background = true);
 
         for (const year of Object.keys(js_data["months"]).reverse()) {
@@ -146,6 +148,7 @@ var TableGenerator = {
     updateTable: function (js_data) {
         table = document.getElementById("speed_table");
         //All
+        this.saveValuesToRow(table, "today", js_data["today"], "Today");
         this.saveValuesToRow(table, "all", js_data["all"], "All");
 
         for (const year of Object.keys(js_data["months"]).reverse()) {
@@ -189,6 +192,15 @@ var TableGenerator = {
             }
             if (js_data["upload"][i]["x"] < divided_data["start_date"][year][month]) {
                 divided_data["start_date"][year][month] = js_data["upload"][i]["x"];
+            }
+        }
+        divided_data["today"] = { "start_date": moment().startOf('day'), "end_date": moment().startOf('day').add(1, "days"), "upload": [], "download": [] };
+        for (let i = 0; i < js_data["upload"].length; i++) {
+            if (js_data["upload"][i]["x"] < divided_data["today"]["end_date"] && js_data["upload"][i]["x"] >= divided_data["today"]["start_date"]) {
+                divided_data["today"]["upload"].push(js_data["upload"][i]["y"]);
+                divided_data["today"]["download"].push(js_data["download"][i]["y"]);
+            } else {
+                break;
             }
         }
         return divided_data;
@@ -239,6 +251,7 @@ var TableGenerator = {
         stats["years"][year] = year_row;
     },
 
+
     calculateStatsForAll: function (stats, data_all) {
         all_row = {};
         all_row["start_date"] = data_all["start_date"];
@@ -249,8 +262,18 @@ var TableGenerator = {
         all_row["avg_download"] = this.get_avg(data_all["avg_download"]);
         stats["all"] = all_row;
     },
+
+    calculateStatsForToday: function (stats, data_all) {
+        row = {}
+        row["max_upload"] = this.get_max(data_all["today"]["upload"]);
+        row["max_download"] = this.get_max(data_all["today"]["download"]);
+        row["avg_upload"] = this.get_avg(data_all["today"]["upload"]);
+        row["avg_download"] = this.get_avg(data_all["today"]["download"]);
+
+    },
     calculate_statistics: function (data) {
         stats = {};
+        stats["today"] = { "start_date": moment().startOf('day'), "end_date": moment().startOf('day').add(1, "days") };
         stats["all"] = {};
         stats["years"] = {};
         stats["months"] = {};
@@ -263,6 +286,7 @@ var TableGenerator = {
             }
             this.calculateStatsForYear(data_year, stats, year, data_all);
         }
+        this.calculateStatsForToday(stats, data);
         this.calculateStatsForAll(stats, data_all);
         return stats;
     },
