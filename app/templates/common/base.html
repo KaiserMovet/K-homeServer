@@ -5,7 +5,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>K-Nanopi</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='node_modules/bootstrap/dist/css/bootstrap.css') }}">
+    <script type="text/javascript" src="{{ url_for('static', filename='base/base.js') }}"></script>
+    {% for css in theme_css%}
+    <link rel="stylesheet" href="{{ url_for('static', filename=css) }}">
+    {% endfor %}
     <script type="text/javascript"
         src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.js') }}"></script>
     <script type="text/javascript"

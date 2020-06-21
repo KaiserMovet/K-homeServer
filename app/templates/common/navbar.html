@@ -1,4 +1,5 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
+<script type="text/javascript" src="{{ url_for('static', filename='navbar/script.js') }}"></script>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <a class="navbar-brand" href="#">K-Home</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -13,6 +14,17 @@
                         class="sr-only">{{'(current)' if current_url == button.url}}</span></a>
             </li>
             {% endfor %}
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+            <li class="pull-right">
+
+                <button class="btn btn-dark" type="submit" onClick="DarkTheme.change()"><svg class="bi bi-moon"
+                        width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd"
+                            d="M14.53 10.53a7 7 0 0 1-9.058-9.058A7.003 7.003 0 0 0 8 15a7.002 7.002 0 0 0 6.53-4.47z" />
+                    </svg></button>
+            </li>
         </ul>
     </div>
 </nav>
