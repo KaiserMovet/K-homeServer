@@ -1,49 +1,19 @@
 <data id="internet_status_data"></data>
-<div class="card-group">
-    <table class="table table-responsive" id="status_table">
-        <thead>
-            <th scope="col">Date</th>
-            <th scope="col">Days</th>
-            <th scope="col">hours</th>
-            <th scope="col">minutes</th>
-            <th scope="col">Days</th>
-            <th scope="col">hours</th>
-            <th scope="col">minutes</th>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
-    {% for name in ["all", "month"] %}
 
-    <div class="card text-center" style="width: 18rem;">
-        <div class="card-body">
-            <h5 class="card-title">Logs for {{ name }}</h5>
-            <p class="card-text">From <span id="{{name}}_start"></span> to <span id="{{name}}_end"></span>
-            </p>
-            <p class="card-text" id="{{name}}_duration_msg"></p>
-        </div>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item {{color}}">
-                <div class="progress">
-                    <div id="{{name}}_true_bar" class="progress-bar bg-success" role="progressbar" style="width: 50%"
-                        aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
-                    <div id="{{name}}_false_bar" class="progress-bar bg-danger" role="progressbar" style="width: 50%"
-                        aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
-            </li>
-            {% for color, status in [("bg-success", "true"), ("bg-danger", "false")] %}
-            <li class="list-group-item {{color}}">
-                <p class="card-text" id="{{name}}_{{status}}_entry_msg"></p>
-                <p class="card-text" id="{{name}}_{{status}}_duration_msg"></p>
-            </li>
-            {% endfor %}
+<table class="table table-responsive" id="status_table">
+    <thead>
+        <th scope="col">Date</th>
+        <th scope="col">Days</th>
+        <th scope="col">hours</th>
+        <th scope="col">minutes</th>
+        <th scope="col">Days</th>
+        <th scope="col">hours</th>
+        <th scope="col">minutes</th>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
 
-        </ul>
-
-
-    </div>
-
-    {% endfor %}
-</div>
 <div id="status_logs">
     {% for log in [] %}
     <div class="{{'alert alert-success' if log.status else 'alert alert-danger'}}" role="alert">

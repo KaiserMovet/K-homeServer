@@ -772,77 +772,6 @@ var InternetStatus = {
         }
     },
 
-    getDurationData: function (json_data) {
-        duration = { 'all': { true: 0, false: 0 }, 'month': { true: 0, false: 0 } }
-        start_last_month = json_data["end_date"][0].clone().add(-1, 'month');
-        for (let i = 0; i < json_data["status"].length; i++) {
-            start_date = json_data["start_date"][i];
-            end_date = json_data["end_date"][i];
-            duration['all'][json_data["status"][i]] += end_date.diff(start_date);
-
-            if (end_date > start_last_month) {
-                if (start_date < start_last_month) {
-                    start_date = start_last_month;
-                }
-                duration['month'][json_data["status"][i]] += end_date.diff(start_date);
-            }
-
-        }
-
-        for (const name of ["all", "month"]) {
-            // Values per cent
-            duration[name]['percent'] = {}
-            for (const status of [true, false]) {
-                dur_in_percent = 0;
-                if (duration[name][status]) {
-                    dur_in_percent = Math.round(duration[name][status] * 100 / (duration[name][true] + duration[name][false]) * 100) / 100;
-                }
-                duration[name]["percent"][status] = dur_in_percent.toFixed(2);
-            }
-            //sum
-            duration[name]['sum'] = moment.duration(duration[name][true] + duration[name][false]);
-            //Duration of statuses
-            for (const status of [true, false]) {
-                duration[name][status] = moment.duration(duration[name][status])
-            }
-        }
-        return duration;
-    },
-
-    setStaticMsg: function () {
-        is_connection = "There was connection for ";
-        is_no_connection = "There was no connection for ";
-        document.getElementById("all_true_entry_msg").innerHTML = is_connection;
-        document.getElementById("all_false_entry_msg").innerHTML = is_no_connection;
-        document.getElementById("month_true_entry_msg").innerHTML = is_connection;
-        document.getElementById("month_false_entry_msg").innerHTML = is_no_connection;
-    },
-
-    writeDataToTable: function (duration, json_data) {
-        for (const name of ["all", "month"]) {
-            document.getElementById(name + "_end").innerHTML = Utils.dateToShortStr(json_data["end_date"][0]);
-            document.getElementById(name + "_duration_msg").innerHTML = this.getMsgFromDuration(duration[name]["sum"]);
-            for (const status of [true, false]) {
-                document.getElementById(name + "_" + status + "_duration_msg").innerHTML = this.getMsgFromDuration(duration[name][status]);
-                //Bar
-                bar = document.getElementById(name + "_" + status + "_bar");
-                bar.innerHTML = duration[name]['percent'][status] + "%";
-                bar.style.width = duration[name]['percent'][status] + "%";
-                bar.aria_valuenow = duration[name]['percent'][status];
-            }
-        }
-
-        document.getElementById("all_start").innerHTML = Utils.dateToShortStr(json_data["start_date"].slice(-1)[0]);
-        document.getElementById("month_start").innerHTML = Utils.dateToShortStr(json_data["end_date"][0].clone().add(-1, "month"));
-
-
-    },
-
-    prepare_table: function (json_data) {
-        duration = this.getDurationData(json_data);
-        this.writeDataToTable(duration, json_data)
-    },
-
     calculateData: function (json_data) {
         calculated_data = { "all": { true: 0, false: 0 }, "years": {}, "months": {} };
         collection = [];
@@ -889,7 +818,7 @@ var InternetStatus = {
         last_duration_msg = json_data["status"][0];
         MainMsg.setStatus(json_data["status"][0], json_data["end_date"][0]);
         this.generate_logs(json_data);
-        this.prepare_table(json_data);
+        //this.prepare_table(json_data);
     },
 }
 
@@ -1008,7 +937,7 @@ var Utils = {
 
     onLoad: function () {
         Utils.startTime();
-        InternetStatus.setStaticMsg();
+        //InternetStatus.setStaticMsg();
         Utils.refresh();
     }
 }
