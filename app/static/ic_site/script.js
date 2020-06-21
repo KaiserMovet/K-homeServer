@@ -288,41 +288,87 @@ var SpeedStatus = {
             'YYYY.MM.DD HH:mm:ss').seconds(0);
     },
 
+    getPluginZoom: function () {
+        return {
+            pan: {
+                enabled: true,
+                mode: 'x',
+                rangeMin: {
+                    x: null,
+                    y: null
+                },
+                rangeMax: {
+                    x: null,
+                    y: null
+                },
+                speed: 20,
+                threshold: 10,
+            },
+            zoom: {
+                enabled: true,
+                drag: false,
+                mode: 'x',
+                rangeMin: {
+                    x: null,
+                    y: null
+                },
+                rangeMax: {
+                    x: null,
+                    y: null
+                },
+                speed: 0.1,
+                threshold: 2,
+                sensitivity: 3,
+            }
+        }
+    },
+
+    getPluginAnnotation: function (data_collection) {
+        console.log(data_collection);
+        dates = [];
+        dates.push(data_collection['download'][0]['x'].clone().add(1, 'month').startOf('month'));
+        last_date = data_collection['download'].slice(-1)[0]['x'].clone().startOf('month');
+        console.log(last_date);
+
+        while (true) {
+            cur_date = dates.slice(-1)[0].clone().add(-1, 'month');
+            dates.push(cur_date);
+            if (last_date.isSame(cur_date)) {
+                break;
+            }
+        }
+        annotations = [];
+        for (const date of dates) {
+            annotation = {
+                type: 'line',
+
+                mode: 'vertical',
+                scaleID: 'x-axis-0',
+                value: date,
+                borderColor: 'green',
+                borderWidth: 1,
+                label: {
+                    enabled: true,
+                    position: "center",
+                    content: date.format("MMMM YYYY"),
+                    position: "right",
+                    xAdjust: 20,
+                }
+            };
+            annotations.push(annotation);
+        }
+
+        return {
+            drawTime: 'afterDatasetsDraw',
+            annotations: annotations
+        }
+    },
+
     getPlugin: function () {
         plugins = {
-            zoom: {
-                pan: {
-                    enabled: true,
-                    mode: 'x',
-                    rangeMin: {
-                        x: null,
-                        y: null
-                    },
-                    rangeMax: {
-                        x: null,
-                        y: null
-                    },
-                    speed: 20,
-                    threshold: 10,
-                },
-                zoom: {
-                    enabled: true,
-                    drag: false,
-                    mode: 'x',
-                    rangeMin: {
-                        x: null,
-                        y: null
-                    },
-                    rangeMax: {
-                        x: null,
-                        y: null
-                    },
-                    speed: 0.1,
-                    threshold: 2,
-                    sensitivity: 3,
-                }
-            }
+            zoom: this.getPluginZoom(),
         };
+        console.log(plugins);
         return plugins;
     },
 
@@ -331,6 +377,7 @@ var SpeedStatus = {
             type: 'line',
             label: "MB",
             options: {
+
                 responsive: true,
                 plugins: SpeedStatus.getPlugin(),
                 scales: {
@@ -358,7 +405,8 @@ var SpeedStatus = {
                         }
                     }],
 
-                }
+                },
+                annotation: this.getPluginAnnotation(data_collection),
             },
             data: {
                 datasets: [
