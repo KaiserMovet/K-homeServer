@@ -418,8 +418,8 @@ var SpeedStatus = {
                     {
                         data: data_collection["download"],
                         label: "Download",
-                        borderColor: 'rgba(200, 200, 0, 1)',
-                        backgroundColor: 'rgba(200, 200, 0, 0.5)',
+                        borderColor: 'rgba(126, 64, 0, 1)',
+                        backgroundColor: 'rgba(255, 126, 0, 0.5)',
                         pointBackgroundColor: 'rgba(0, 0, 0, 1)',
 
                     }
