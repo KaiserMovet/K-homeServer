@@ -136,6 +136,7 @@ var TableGenerator = {
     },
 
     saveValuesToRow: function (table, id, js_data, name) {
+        console.log(js_data)
         this.setValueOfCell(table, id, "name", name);
         for (const date of ["start_date", "end_date"]) {
             this.setValueOfCell(table, id, date, Utils.dateToShortStr(js_data[date]));
@@ -264,12 +265,10 @@ var TableGenerator = {
     },
 
     calculateStatsForToday: function (stats, data_all) {
-        row = {}
-        row["max_upload"] = this.get_max(data_all["today"]["upload"]);
-        row["max_download"] = this.get_max(data_all["today"]["download"]);
-        row["avg_upload"] = this.get_avg(data_all["today"]["upload"]);
-        row["avg_download"] = this.get_avg(data_all["today"]["download"]);
-
+        stats["today"]["max_upload"] = this.get_max(data_all["today"]["upload"]);
+        stats["today"]["max_download"] = this.get_max(data_all["today"]["download"]);
+        stats["today"]["avg_upload"] = this.get_avg(data_all["today"]["upload"]);
+        stats["today"]["avg_download"] = this.get_avg(data_all["today"]["download"]);
     },
     calculate_statistics: function (data) {
         stats = {};
