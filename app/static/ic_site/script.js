@@ -327,7 +327,7 @@ var SpeedStatus = {
         dates = [];
         dates.push(data_collection['download'][0]['x'].clone().add(1, 'month').startOf('month'));
         last_date = data_collection['download'].slice(-1)[0]['x'].clone().startOf('month');
-
+        next_check = data_collection['download'][0]['x'].clone().add(1, "hour")
         while (true) {
             cur_date = dates.slice(-1)[0].clone().add(-1, 'month');
             dates.push(cur_date);
@@ -355,6 +355,44 @@ var SpeedStatus = {
             };
             annotations.push(annotation);
         }
+        now_anno = {
+            type: 'line',
+
+            mode: 'vertical',
+            scaleID: 'x-axis-0',
+            value: moment(),
+            borderColor: 'red',
+            borderWidth: 1,
+            label: {
+                enabled: true,
+                position: "center",
+                content: "Now",
+                position: "right",
+                xAdjust: 25,
+                yAdjust: 30,
+
+            }
+        };
+        next_anno = {
+            type: 'line',
+
+            mode: 'vertical',
+            scaleID: 'x-axis-0',
+            value: next_check,
+            borderColor: 'blue',
+            borderWidth: 1,
+            label: {
+                enabled: true,
+                position: "center",
+                content: "Next Check",
+                position: "right",
+                xAdjust: 40,
+                yAdjust: 60,
+            }
+        };
+        annotations.push(now_anno);
+        annotations.push(next_anno);
+
 
         return {
             drawTime: 'afterDatasetsDraw',
@@ -403,7 +441,7 @@ var SpeedStatus = {
                     }],
 
                 },
-                annotation: this.getPluginAnnotation(data_collection),
+                annotation: {},//this.getPluginAnnotation(data_collection),
             },
             data: {
                 datasets: [
@@ -496,10 +534,13 @@ var SpeedStatus = {
             graph.update();
 
         } else {
-            char = this.createChartObj(ctx, data_collection, start_date, end_date);
+            graph = this.createChartObj(ctx, data_collection, start_date, end_date);
             this.resizeCanvas();
-            ctx.data('graph', char);
+            ctx.data('graph', graph);
         }
+        graph.options.annotation = this.getPluginAnnotation(data_collection);
+        graph.update();
+
     },
 
     get_avg: function (data_list) {
