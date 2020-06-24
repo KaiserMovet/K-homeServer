@@ -1,0 +1,3 @@
+[submodule "app/objects/where_is_my_money2"]
+	path = app/objects/where_is_my_money2
+	url = https://github.com/KaiserMovet/where_is_my_money2.git
