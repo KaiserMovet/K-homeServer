@@ -132,3 +132,5 @@ dmypy.json
 app/static/node_modules
 configuration.yml
 init.sh
+credentials.json
+token.pickle
