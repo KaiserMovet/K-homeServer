@@ -948,8 +948,7 @@ var Utils = {
     refreshDuration: function () {
         last_date = moment(document.getElementById("last_time").innerHTML, "YYYY.MM.DD - HH:mm:ss");
         if (last_date.isValid()) {
-            last_date.add(5, "minutes");
-            last_date.add(15, "seconds");
+            last_date.add(6, "minutes");
         } else {
             last_date = moment().add(5, "seconds");
         }
