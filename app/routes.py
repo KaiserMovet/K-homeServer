@@ -5,7 +5,7 @@ from flask import redirect, request, render_template, Markup
 from app.objects.config_handler import get_config, set_path
 from app.objects.internet_check import LogCollection as acLogCollection
 from app.objects.internet_speed import LogCollection as isLogCollection
-
+from app.objects.where_is_my_money2 import Wim
 import app.render_manager as rm
 import app.site_manager as sm
 
@@ -44,3 +44,10 @@ def api_internet_status():
 def api_internet_speed():
     log_path = get_config().INTERNET_SPEED_LOG
     return isLogCollection(log_path).to_json()
+
+
+@mapp.route("/api/wim/trans")
+def api_wim_trans():
+    sheet_id = get_config().SHEET_ID
+    print(Wim(sheet_id).get_transactions())
+    return ""
