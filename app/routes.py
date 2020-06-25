@@ -1,8 +1,9 @@
 import json
 import os
+import threading
 from app import app as mapp
 from flask import redirect, request, render_template, Markup
-# from app import render
+
 from app.objects.config_handler import get_config, set_path
 from app.objects.internet_check import LogCollection as acLogCollection
 from app.objects.internet_speed import LogCollection as isLogCollection
@@ -17,6 +18,12 @@ def load_config():
     ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
     config_path = os.path.join(ROOT_DIR, '../configuration.yml')
     set_path(config_path)
+
+
+def get_google_sem():
+    if "google_sem" not in mapp.global_data:
+        mapp.global_data["google_sem"] = threading.Semaphore()
+    return mapp.global_data["google_sem"]
 
 
 load_config()
@@ -75,7 +82,7 @@ def api_wim_cat():
     if not check_token:
         return ""
     sheet_id = get_config().SHEET_ID
-    res = Wim(sheet_id).get_cat()
+    res = Wim(sheet_id, get_google_sem()).get_cat()
     return json.dumps(res)
 
 
@@ -84,7 +91,7 @@ def api_wim_cat_base():
     if not check_token:
         return ""
     sheet_id = get_config().SHEET_ID
-    res = Wim(sheet_id).get_cat_base()
+    res = Wim(sheet_id, get_google_sem()).get_cat_base()
     return json.dumps(res)
 
 # edit
@@ -96,5 +103,5 @@ def api_wim_edt_cat_base():
     body = request.get_json()
     target = body["target"]
     cat = body["cat"]
-    Wim(sheet_id).edit_cat_of_target(target, cat)
+    Wim(sheet_id, get_google_sem()).edit_cat_of_target(target, cat)
     return ""
