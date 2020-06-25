@@ -26,6 +26,7 @@ class ConfigHandler:
         self.INTERNET_CHECK_LOG = conf_dict.get("internet_check_log")
         self.INTERNET_SPEED_LOG = conf_dict.get("internet_speed_log")
         self.SHEET_ID = conf_dict.get("sheet_id")
+        self.TOKEN = conf_dict.get("token")
 
     def _load_file(self):
         with open(self.config_path) as file:

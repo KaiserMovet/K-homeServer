@@ -1,3 +1,4 @@
+import json
 import os
 from app import app as mapp
 from flask import redirect, request, render_template, Markup
@@ -28,12 +29,21 @@ def admin():
 
 @mapp.route("/internet_check")
 def ic_site():
-    log_path = get_config().INTERNET_CHECK_LOG
-    speed_path = get_config().INTERNET_SPEED_LOG
-    return sm.IcSite.action(log_path=log_path, speed_path=speed_path)
+    return sm.IcSite.action()
+
+
+@mapp.route("/wim/summary")
+def wim_site_summary():
+    return sm.WimSite.action("summary")
+
+
+@mapp.route("/wim/categories")
+def wim_site_cat():
+    return sm.WimSite.action("categories")
 
 
 # API
+# Internet Check
 @mapp.route("/api/internet_status")
 def api_internet_status():
     log_path = get_config().INTERNET_CHECK_LOG
@@ -46,8 +56,45 @@ def api_internet_speed():
     return isLogCollection(log_path).to_json()
 
 
+# wim
+def check_token():
+    token = get_config().TOKEN
+    return request.cookies.get('token') == token
+
+# get
 @mapp.route("/api/wim/trans")
 def api_wim_trans():
+    if not check_token:
+        return ""
     sheet_id = get_config().SHEET_ID
-    print(Wim(sheet_id).get_transactions())
+    return ""
+
+
+@mapp.route("/api/wim/cat")
+def api_wim_cat():
+    if not check_token:
+        return ""
+    sheet_id = get_config().SHEET_ID
+    res = Wim(sheet_id).get_cat()
+    return json.dumps(res)
+
+
+@mapp.route("/api/wim/cat_base")
+def api_wim_cat_base():
+    if not check_token:
+        return ""
+    sheet_id = get_config().SHEET_ID
+    res = Wim(sheet_id).get_cat_base()
+    return json.dumps(res)
+
+# edit
+@mapp.route("/api/wim/edit/cat_base", methods=['POST'])
+def api_wim_edt_cat_base():
+    if not check_token:
+        return ""
+    sheet_id = get_config().SHEET_ID
+    body = request.get_json()
+    target = body["target"]
+    cat = body["cat"]
+    Wim(sheet_id).edit_cat_of_target(target, cat)
     return ""

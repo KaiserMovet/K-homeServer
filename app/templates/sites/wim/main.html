@@ -1,0 +1,35 @@
+<script type="text/javascript" src="{{ url_for('static', filename='wim/wim.js') }}">
+</script>
+<table class="table">
+    <tr>
+        <td>
+            <h1>Where is my money?</h1>
+        </td>
+        <td class="text-right">
+            <div>
+                <form>
+                    Token: <input id="Token" type="text">
+                    <button type="button" class="btn btn-primary" onClick="TokenManager.setToken()">Submit</button>
+                </form>
+            </div>
+        </td>
+    </tr>
+</table>
+<div class="btn-toolbar mb-3" role="toolbar" aria-label="Toolbar with button groups">
+    <div class="btn-group-horizontal">
+        {% for path in sidebar %}
+        {% if path.active %}
+        <a href="{{url_for(path.url)}}" type="button" class="btn btn-success text-dark"
+            name="{{path}}">{{path.name}}</a>
+        {% else %}
+        <a href="{{url_for(path.url)}}" type="button" class="btn btn-secondary text-light"
+            name="{{path}}">{{path.name}}</a>
+        {% endif %}
+        {% endfor %}</div>
+
+</div>
+<div class="progress">
+    <div id="loading_bar" class="progress-bar progress-bar-striped bg-info" role="progressbar" style="width: 100%"
+        aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+</div>
+{{subsite_content}}
