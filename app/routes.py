@@ -2,7 +2,7 @@ import json
 import os
 import threading
 from app import app as mapp
-from flask import redirect, request, render_template, Markup
+from flask import redirect, request, render_template, Markup, flash
 
 from app.objects.config_handler import get_config, set_path
 from app.objects.internet_check import LogCollection as acLogCollection
@@ -49,6 +49,23 @@ def wim_site_cat():
     return sm.WimSite.action("categories")
 
 
+@mapp.route("/wim/upload", methods=['GET', 'POST'])
+def wim_site_upload():
+    if not check_token:
+        return ""
+    if request.method == 'POST':
+        if 'myfile' not in request.files:
+            return redirect(request.url)
+        file = request.files['myfile']
+        if file.filename == '':
+            return redirect(request.url)
+        file.save(os.path.join(*mapp.config['UPLOAD_FOLDER']))
+        sheet_id = get_config().SHEET_ID
+        wim = Wim(sheet_id, get_google_sem())
+        wim.parseAndSaveToDataBase(os.path.join(*mapp.config['UPLOAD_FOLDER']))
+        os.remove(os.path.join(*mapp.config['UPLOAD_FOLDER']))
+    return sm.WimSite.upload()
+
 # API
 # Internet Check
 @mapp.route("/api/internet_status")
@@ -63,7 +80,7 @@ def api_internet_speed():
     return isLogCollection(log_path).to_json()
 
 
-# wim
+# Wim
 def check_token():
     token = get_config().TOKEN
     return request.cookies.get('token') == token

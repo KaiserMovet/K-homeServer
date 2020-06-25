@@ -15,11 +15,23 @@ class WimSite:
     MAIN = "sites/wim/main.html"
     SUMMARY = "sites/wim/summary.html"
     CATEGORIES = "sites/wim/categories.html"
+    UPLOAD = "sites/wim/upload.html"
 
     SIDEBAR_BUTTONS = [
         SideButton("Summary", "wim_site_summary"),
         SideButton("Categories", "wim_site_cat"),
+        SideButton("Upload", "wim_site_upload"),
     ]
+
+    @classmethod
+    def upload(cls):
+        sidebar = cls.SIDEBAR_BUTTONS
+        site_template = ""
+        sidebar[0].active = False
+        sidebar[1].active = False
+        sidebar[2].active = True
+        site_template = cls.UPLOAD
+        return cls.render(sidebar, site_template)
 
     @classmethod
     def action(cls, site_name):
@@ -28,11 +40,13 @@ class WimSite:
         if(site_name == "summary"):
             sidebar[0].active = True
             sidebar[1].active = False
+            sidebar[2].active = False
             site_template = cls.SUMMARY
 
         elif(site_name == "categories"):
             sidebar[0].active = False
             sidebar[1].active = True
+            sidebar[2].active = False
             site_template = cls.CATEGORIES
 
         # Render
