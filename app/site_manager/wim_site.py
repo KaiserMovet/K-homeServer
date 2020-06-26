@@ -14,11 +14,13 @@ class WimSite:
 
     MAIN = "sites/wim/main.html"
     SUMMARY = "sites/wim/summary.html"
+    YEARLY = "sites/wim/yearly.html"
     CATEGORIES = "sites/wim/categories.html"
     UPLOAD = "sites/wim/upload.html"
 
     SIDEBAR_BUTTONS = [
-        SideButton("Summary", "wim_site_summary"),
+        SideButton("Monthly", "wim_site_summary"),
+        SideButton("Yearly", "wim_site_yearly"),
         SideButton("Categories", "wim_site_cat"),
         SideButton("Upload", "wim_site_upload"),
     ]
@@ -29,7 +31,8 @@ class WimSite:
         site_template = ""
         sidebar[0].active = False
         sidebar[1].active = False
-        sidebar[2].active = True
+        sidebar[2].active = False
+        sidebar[3].active = True
         site_template = cls.UPLOAD
         return cls.render(sidebar, site_template)
 
@@ -41,13 +44,22 @@ class WimSite:
             sidebar[0].active = True
             sidebar[1].active = False
             sidebar[2].active = False
+            sidebar[3].active = False
             site_template = cls.SUMMARY
 
         elif(site_name == "categories"):
             sidebar[0].active = False
+            sidebar[1].active = False
+            sidebar[2].active = True
+            sidebar[3].active = False
+            site_template = cls.CATEGORIES
+
+        elif(site_name == "yearly"):
+            sidebar[0].active = False
             sidebar[1].active = True
             sidebar[2].active = False
-            site_template = cls.CATEGORIES
+            sidebar[3].active = False
+            site_template = cls.YEARLY
 
         # Render
         return cls.render(sidebar, site_template)

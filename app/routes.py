@@ -44,6 +44,11 @@ def wim_site_summary():
     return sm.WimSite.action("summary")
 
 
+@mapp.route("/wim/yearly")
+def wim_site_yearly():
+    return sm.WimSite.action("yearly")
+
+
 @mapp.route("/wim/categories")
 def wim_site_cat():
     return sm.WimSite.action("categories")
@@ -86,12 +91,17 @@ def check_token():
     return request.cookies.get('token') == token
 
 # get
-@mapp.route("/api/wim/trans")
+@mapp.route("/api/wim/trans", methods=['GET', 'POST'])
 def api_wim_trans():
     if not check_token:
         return ""
     sheet_id = get_config().SHEET_ID
-    return ""
+    body = request.get_json()
+    year = body.get("year", "")
+    month = body.get("month", "")
+    res = Wim(sheet_id, get_google_sem()).get_transactions(year, month)
+    res_list = [trans.toDict() for trans in res]
+    return json.dumps(res_list)
 
 
 @mapp.route("/api/wim/cat")
@@ -109,6 +119,15 @@ def api_wim_cat_base():
         return ""
     sheet_id = get_config().SHEET_ID
     res = Wim(sheet_id, get_google_sem()).get_cat_base()
+    return json.dumps(res)
+
+
+@mapp.route("/api/wim/trans/border_dates")
+def api_wim_trans_border_dates():
+    if not check_token:
+        return ""
+    sheet_id = get_config().SHEET_ID
+    res = Wim(sheet_id, get_google_sem()).get_trans_border_dates()
     return json.dumps(res)
 
 # edit
