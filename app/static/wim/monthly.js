@@ -1,13 +1,10 @@
 var SummaryChar = {
     resizeCanvas: function () {
         var ctx = document.getElementById('summary_char');
-        console.log(ctx);
         ctx = ctx.getContext('2d');
-        console.log(ctx.canvas.width);
 
         ctx.canvas.width = window.innerWidth * 50 / 100;
         ctx.canvas.height = window.innerHeight * 50 / 100;
-        console.log(ctx.canvas.width);
 
     },
     bgCol: function (cat_data, alpha = 1) {
@@ -110,7 +107,6 @@ var OutcomeTable = {
     enableButton: function (id) {
         tbody = this.getTable();
         row = tbody.find("#" + id);
-        console.log(row);
         button = row.find("td").eq(4).find("button");
         button.attr("disabled", false);
     },
