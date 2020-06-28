@@ -507,9 +507,10 @@ var SpeedStatus = {
     },
 
     resizeCanvas: function () {
-        // var ctx = document.getElementById("myChart");
-        // ctx.width = window.innerWidth * 90 / 100;
-        // ctx.height = window.innerHeight * 40 / 100;
+        var ctx = document.getElementById("myChart");
+        ctx = ctx.getContext('2d');
+        ctx.width = window.innerWidth * 90 / 100;
+        ctx.height = window.innerHeight * 40 / 100;
     },
 
     getJsonData: function () {

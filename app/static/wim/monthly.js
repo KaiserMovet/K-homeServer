@@ -1,4 +1,15 @@
 var SummaryChar = {
+    resizeCanvas: function () {
+        var ctx = document.getElementById('summary_char');
+        console.log(ctx);
+        ctx = ctx.getContext('2d');
+        console.log(ctx.canvas.width);
+
+        ctx.canvas.width = window.innerWidth * 50 / 100;
+        ctx.canvas.height = window.innerHeight * 50 / 100;
+        console.log(ctx.canvas.width);
+
+    },
     bgCol: function (cat_data, alpha = 1) {
         rgba = "";
         rgba += "rgba("
@@ -34,12 +45,13 @@ var SummaryChar = {
         graph.update();
     },
     init: function () {
-        console.log("SummartChart");
+        this.resizeCanvas();
         ctx = $("#summary_char");
         var graph = new Chart(ctx, {
             type: 'pie',
             data: {},
             options: {
+                responsive: true,
                 plugins: {
                     labels: {
                         render: 'percentage',

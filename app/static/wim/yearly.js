@@ -1,4 +1,5 @@
 var YearlyTable = {
+
     getTable: function () {
         return $("#yearly_table");
     },
@@ -74,6 +75,12 @@ var YearlyTable = {
 }
 
 var YearlyChar = {
+    resizeCanvas: function () {
+        var ctx = document.getElementById('yearly_char');
+        ctx = ctx.getContext('2d');
+        ctx.canvas.width = window.innerWidth * 90 / 100;
+        ctx.canvas.height = window.innerHeight * 40 / 100;
+    },
     bgCol: function (cat_data, alpha = 1) {
         rgba = "";
         rgba += "rgba("
@@ -146,6 +153,7 @@ var YearlyChar = {
     },
 
     init: function () {
+        this.resizeCanvas();
         ctx = $("#yearly_char");
         categories = getCategories();
         datasets = [];
