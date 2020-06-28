@@ -62,6 +62,7 @@ def get_wim():
                 current_query = query_name
                 if query_name not in mapp.global_data["wim"]:
                     mapp.global_data["wim_sem"].acquire()
+                    print("CREATING QUERY: ", query_name)
                     mapp.global_data["wim"][query_name] = Wim(
                         sheet_id, query_sheet_name=query_name)
                     mapp.global_data["wim_sem"].release()
