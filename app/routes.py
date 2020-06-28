@@ -20,13 +20,27 @@ def load_config():
     set_path(config_path)
 
 
+load_config()
+
+
 def get_google_sem():
     if "google_sem" not in mapp.global_data:
         mapp.global_data["google_sem"] = threading.Semaphore()
     return mapp.global_data["google_sem"]
 
 
-load_config()
+def check_token():
+    token = get_config().TOKEN
+    return request.cookies.get('token') == token
+
+
+def get_wim():
+    if not check_token():
+        abort(401)
+    sheet_id = get_config().SHEET_ID
+    if "wim" not in mapp.global_data:
+        mapp.global_data["wim"] = Wim(sheet_id, get_google_sem())
+    return mapp.global_data["wim"]
 
 
 @mapp.route("/")
@@ -66,7 +80,7 @@ def wim_site_upload():
             return redirect(request.url)
         file.save(os.path.join(*mapp.config['UPLOAD_FOLDER']))
         sheet_id = get_config().SHEET_ID
-        wim = Wim(sheet_id, get_google_sem())
+        wim = get_wim()
         wim.parseAndSaveToDataBase(os.path.join(*mapp.config['UPLOAD_FOLDER']))
         os.remove(os.path.join(*mapp.config['UPLOAD_FOLDER']))
     return sm.WimSite.upload()
@@ -86,82 +100,58 @@ def api_internet_speed():
 
 
 # Wim
-def check_token():
-    token = get_config().TOKEN
-    return request.cookies.get('token') == token
 
 # get
 @mapp.route("/api/wim/trans", methods=['GET', 'POST'])
 def api_wim_trans():
-    if not check_token():
-        abort(401)
-    sheet_id = get_config().SHEET_ID
     body = request.get_json()
     year = body.get("year", "")
     month = body.get("month", "")
-    res = Wim(sheet_id, get_google_sem()).get_transactions(year, month)
+    res = get_wim().get_transactions(year, month)
     res_list = [trans.toDict() for trans in res]
     return json.dumps(res_list)
 
 
 @mapp.route("/api/wim/cat")
 def api_wim_cat():
-    if not check_token():
-        abort(401)
-    sheet_id = get_config().SHEET_ID
-    res = Wim(sheet_id, get_google_sem()).get_cat()
+    res = get_wim().get_cat()
     return json.dumps(res)
 
 
 @mapp.route("/api/wim/cat_base")
 def api_wim_cat_base():
-    if not check_token():
-        abort(401)
-    sheet_id = get_config().SHEET_ID
-    res = Wim(sheet_id, get_google_sem()).get_cat_base()
+    res = get_wim().get_cat_base()
     return json.dumps(res)
 
 
 @mapp.route("/api/wim/trans/border_dates")
 def api_wim_trans_border_dates():
-    if not check_token():
-        abort(401)
-    sheet_id = get_config().SHEET_ID
-    res = Wim(sheet_id, get_google_sem()).get_trans_border_dates()
+    res = get_wim().get_trans_border_dates()
     return json.dumps(res)
 
 
 @mapp.route("/api/wim/trans/summary", methods=['POST'])
 def api_wim_trans_summary():
-    if not check_token():
-        abort(401)
-    sheet_id = get_config().SHEET_ID
     body = request.get_json()
     year = body.get("year", "")
     month = body.get("month", "")
-    res = Wim(sheet_id, get_google_sem()).get_transactions_summary(year, month)
+    res = get_wim().get_transactions_summary(year, month)
     return json.dumps(res)
 
 # edit
 @mapp.route("/api/wim/edit/cat_base", methods=['POST'])
 def api_wim_edt_cat_base():
-    if not check_token():
-        abort(401)
-    sheet_id = get_config().SHEET_ID
     body = request.get_json()
     target = body["target"]
     cat = body["cat"]
-    Wim(sheet_id, get_google_sem()).edit_cat_of_target(target, cat)
+    get_wim().edit_cat_of_target(target, cat)
     return ""
 
 
 @mapp.route("/api/wim/edit/cat_trans", methods=['POST'])
 def api_wim_edt_cat_trans():
-    if not check_token():
-        abort(401)
-    sheet_id = get_config().SHEET_ID
     body = request.get_json()
     id = body["id"]
     cat = body["cat"]
-    Wim(sheet_id, get_google_sem()).edit_cat_of_transaction(id, cat)
+    get_wim().edit_cat_of_transaction(id, cat)
     return ""
