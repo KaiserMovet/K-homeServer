@@ -1,6 +1,7 @@
 import json
 import os
 import threading
+import time
 from app import app as mapp
 from flask import redirect, request, render_template, Markup, flash, abort
 from contextlib import contextmanager
@@ -70,6 +71,7 @@ def get_wim():
                 yield mapp.global_data["wim"][query_name]
                 while_con = False
                 break
+        time.sleep(0.5)
 
     sem_dict[current_query].release()
 
