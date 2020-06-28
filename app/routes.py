@@ -44,6 +44,8 @@ def check_token():
 
 @contextmanager
 def get_wim():
+    if "wim_sem" not in mapp.global_data:
+        mapp.global_data["wim_sem"] = threading.Semaphore()
     if not check_token():
         abort(401)
     sheet_id = get_config().SHEET_ID
@@ -59,8 +61,10 @@ def get_wim():
                 print("Lock QUERY: ", query_name)
                 current_query = query_name
                 if query_name not in mapp.global_data["wim"]:
+                    mapp.global_data["wim_sem"].acquire()
                     mapp.global_data["wim"][query_name] = Wim(
                         sheet_id, query_sheet_name=query_name)
+                    mapp.global_data["wim_sem"].release()
                 yield mapp.global_data["wim"][query_name]
                 while_con = False
                 break
