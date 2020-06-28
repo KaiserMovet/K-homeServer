@@ -29,9 +29,9 @@ def get_google_sem():
             "query": threading.Semaphore(),
             "query0": threading.Semaphore(),
             "query1": threading.Semaphore(),
-            "query2": threading.Semaphore(),
-            "query3": threading.Semaphore(),
-            "query4": threading.Semaphore(),
+            # "query2": threading.Semaphore(),
+            # "query3": threading.Semaphore(),
+            # "query4": threading.Semaphore(),
         }
         # threading.Semaphore()
     return mapp.global_data["google_sem"]
