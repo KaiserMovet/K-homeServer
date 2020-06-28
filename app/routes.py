@@ -58,7 +58,7 @@ def get_wim():
     while while_con:
         for query_name, sem in sem_dict.items():
             print("CHECK QUERY: ", query_name)
-            if sem.acquire(timeout=0.1):
+            if sem.acquire(timeout=1):
                 print("Lock QUERY: ", query_name)
                 current_query = query_name
                 if query_name not in mapp.global_data["wim"]:
@@ -71,7 +71,6 @@ def get_wim():
                 yield mapp.global_data["wim"][query_name]
                 while_con = False
                 break
-        time.sleep(0.5)
 
     sem_dict[current_query].release()
 

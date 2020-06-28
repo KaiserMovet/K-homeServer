@@ -4,6 +4,28 @@ var YearlyTable = {
         return $("#yearly_table");
     },
 
+    getCalRow: function (mode) {
+        tr = $("<tr data-math='ignore'></tr>");
+        td = $("<th></th>");
+        td.html(mode);
+        tr.append(td);
+
+        td = $('<th data-math="col-' + mode + '"></th >');
+        tr.append(td.clone());
+        tr.append(td.clone());
+        tr.append(td.clone());
+
+        categories = getCategories();
+        for (const cat of Object.keys(categories)) {
+            if (cat == 100) {
+                continue;
+            }
+            tr.append(td.clone());
+
+        }
+        return tr;
+    },
+
     getRow: function (resp) {
         tr = $("<tr></tr>");
         td = $("<td></td>");
@@ -33,9 +55,10 @@ var YearlyTable = {
     },
 
     updateData: function (resp) {
-        tbody = this.getTable().find("tbody");
+        tbody = this.getTable().find("#data");
         tbody.append(this.getRow(resp));
         this.getTable().trigger("update");
+        this.getTable().trigger("recalculate");
         this.getTable().tablesorter({
             sortList: [[0, 1]]
         });
@@ -64,8 +87,12 @@ var YearlyTable = {
     init: function () {
         thead = this.getTable().find("thead");
         thead.append(this.getHeader());
+        tbody = this.getTable().find("#cal");
+        tbody.append(this.getCalRow("mean"));
+        tbody.append(this.getCalRow("sum"));
         this.getTable().tablesorter({
-            sortList: [[0, 1]]
+            sortList: [[0, 1]],
+            widgets: ['math', 'zebra']
         });
         this.getTable().trigger("update");
     },
