@@ -55,18 +55,18 @@ def get_wim():
     if "wim" not in mapp.global_data:
         mapp.global_data["wim"] = {}
     while_con = True
+    print("WAIT FOR QUERY")
     while while_con:
         for query_name, sem in sem_dict.items():
-            print("CHECK QUERY: ", query_name)
             if sem.acquire(timeout=1):
-                print("Lock QUERY: ", query_name)
+                print("LOCK QUERY: ", query_name)
                 current_query = query_name
                 if query_name not in mapp.global_data["wim"]:
                     mapp.global_data["wim_sem"].acquire()
                     print("CREATING QUERY: ", query_name)
                     mapp.global_data["wim"][query_name] = Wim(
                         sheet_id, query_sheet_name=query_name)
-                    print("CREATED QUERY: ", query_name)
+                    print("RELEASE QUERY: ", query_name)
                     mapp.global_data["wim_sem"].release()
                 yield mapp.global_data["wim"][query_name]
                 while_con = False
