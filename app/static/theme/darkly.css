@@ -1,3 +1,38 @@
+/* ORANGE */
+.bg-orange {
+  background-color: #ff7733 !important;
+}
+
+a.bg-orange:hover, a.bg-orange:focus,
+button.bg-orange:hover,
+button.bg-orange:focus {
+  background-color: #ff7733 !important;
+}
+
+.table-orange,
+.table-orange > th,
+.table-orange > td {
+  background-color: #ff7733;
+}
+
+.table-orange th,
+.table-orange td,
+.table-orange thead th,
+.table-orange tbody + tbody {
+  border-color: #ff7733;
+}
+
+.table-hover .table-orange:hover {
+  background-color: #ff7733;
+}
+
+.table-hover .table-orange:hover > td,
+.table-hover .table-orange:hover > th {
+  background-color: #ff7733;
+}
+
+/* OTHERS */
+
 .navbar {
     padding: 0.5rem 1rem;
   }

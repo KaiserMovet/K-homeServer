@@ -13,8 +13,10 @@
     "bootswatch": "^4.5.0",
     "chart.js": "^2.9.3",
     "chartjs-plugin-annotation": "^0.5.7",
+    "chartjs-plugin-labels": "^1.1.0",
     "chartjs-plugin-zoom": "^0.7.7",
     "jquery": "^3.5.1",
-    "moment": "^2.26.0"
+    "moment": "^2.26.0",
+    "tablesorter": "^2.31.3"
   }
 }

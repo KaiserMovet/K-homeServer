@@ -8,9 +8,11 @@ class Base:
     def get_theme(theme):
         themes = {
             "white": [
+                'theme/ccolors.css',
                 'node_modules/bootstrap/dist/css/bootstrap.css',
             ],
             "dark": [
+                'theme/ccolors.css',
                 'node_modules/bootstrap/dist/css/bootstrap.css',
                 'node_modules/bootswatch/dist/darkly/bootstrap.css',
                 'theme/darkly.css'],

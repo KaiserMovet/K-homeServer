@@ -17,7 +17,30 @@
         <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
             <div class="card-body">
 
-                CHARS
+                <div class="card-columns">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Bilans</h5>
+                            <p class="card-text ">Wplywy: <span id="summary_card_income"></span></p>
+                            <p class="card-text ">Wydatki: <span id="summary_card_outcome"></spanid></span></p>
+                            <p class="card-text ">Bilans: <span id="summary_card_balanse"></span></span> </p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Wydatki</h5>
+                            <div id="summary_outcome_card">
+
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <canvas id="summary_char">
+
+                </canvas>
 
             </div>
         </div>
@@ -33,8 +56,32 @@
         </div>
         <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
             <div class="card-body">
+                <h3>Income</h3>
+                <table id="wim_income_table" class="tablesorter table">
+                    <thead>
+                        <tr>
+                            <th>Target</th>
+                            <th>Date</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <h3>Outcome</h3>
 
-                DATA
+                <table id="wim_outcome_table" class="tablesorter table">
+                    <thead>
+                        <tr>
+                            <th>Target</th>
+                            <th>Date</th>
+                            <th>Value</th>
+                            <th>Category</th>
+                            <th>Edit Category</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+
+                </table>
 
             </div>
         </div>
