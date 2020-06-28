@@ -65,6 +65,7 @@ def get_wim():
                     print("CREATING QUERY: ", query_name)
                     mapp.global_data["wim"][query_name] = Wim(
                         sheet_id, query_sheet_name=query_name)
+                    print("CREATED QUERY: ", query_name)
                     mapp.global_data["wim_sem"].release()
                 yield mapp.global_data["wim"][query_name]
                 while_con = False
