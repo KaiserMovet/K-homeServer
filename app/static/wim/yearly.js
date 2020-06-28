@@ -33,7 +33,6 @@ var YearlyTable = {
     },
 
     updateData: function (resp) {
-        console.log(resp);
         tbody = this.getTable().find("tbody");
         tbody.append(this.getRow(resp));
         this.getTable().trigger("update");
@@ -65,7 +64,6 @@ var YearlyTable = {
     init: function () {
         thead = this.getTable().find("thead");
         thead.append(this.getHeader());
-        console.log(this.getTable().tablesorter)
         this.getTable().tablesorter({
             sortList: [[0, 1]]
         });
