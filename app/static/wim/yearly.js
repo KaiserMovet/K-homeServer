@@ -215,9 +215,13 @@ var YearlyChar = {
                     xAxes: [{
                         type: 'time',
                         time: {
+                            unit: 'month',
+                            unitStepSize: 1,
                             displayFormats: {
                                 quarter: 'MMM YYYY',
-                                hour: 'MMM DD HH:mm'
+                                hour: 'MMM YYYY',
+                                month: 'MMM YYYY',
+                                day: 'MMM YYYY',
                             }
                         }
                     }],
@@ -251,7 +255,8 @@ var MonthData = {
     },
 
     init: function (response) {
-        months_list = this.getMonthsList(response);
+        months_list = MonthData.getMonthsList(response);
+        Loading(true, months_list.length, text = "Loading month summary...")
         for (const date of months_list) {
             year = date.year();
             month = date.month() + 1;
@@ -284,24 +289,11 @@ var DataProvider = {
         url = this.getURL("/api/wim/trans");
         var client = new this.HttpClient();
         data = { "year": year, "month": month };
-        Loading(true);
         client.post(url, data, function (response) {
             response = JSON.parse(response);
             Loading(false);
             MonthlyData.init(response)
         })
-    },
-
-    getDates: function () {
-        url = this.getURL("/api/wim/trans/border_dates");
-
-        var client = new this.HttpClient();
-        Loading(true);
-        client.get(url, function (response) {
-            Loading(false);
-            response = JSON.parse(response);
-            MonthData.init(response)
-        });
     },
 
 }
@@ -310,7 +302,8 @@ var Utils = {
     onLoad: function () {
         YearlyChar.init();
         YearlyTable.init();
-        DataProvider.getDates();
+        Loading(true, 1, "Loading border dates...");
+        DataProviderSummary.getDates(MonthData.init);
     }
 }
 

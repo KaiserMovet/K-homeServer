@@ -97,8 +97,8 @@ var Summary = {
         SummaryChar.updateData(response);
     },
 
-    init: function (year, month) {
-        MonthSummary.getData(year, month, this.generateSummary)
+    init: function (response) {
+        Summary.generateSummary(response);
     },
 }
 
@@ -263,7 +263,7 @@ var MonthlyData = {
 
     init: function (data) {
         categories = getCategories();
-        res = this.prepareData(data, categories);
+        res = MonthlyData.prepareData(data, categories);
         IncomeTable.load(res["income"]);
         OutcomeTable.load(res["outcome"], categories);
     }
@@ -276,8 +276,9 @@ var MonthlyChoose = {
         val = $("#monthly_choose option:selected").val().split("-");
         year = parseInt(val[0]);
         month = parseInt(val[1]);
-        DataProvider.getMonthData(year, month);
-        Summary.init(year, month);
+        Loading(true, counter = 2, text = "Loading month data...")
+        DataProvider.getMonthData(year, month, MonthlyData.init);
+        MonthSummary.getData(year, month, Summary.init);
     },
 
     getMonthsList: function (border_dates) {
@@ -305,9 +306,9 @@ var MonthlyChoose = {
         for (i = 0; i < border_dates.length; i++) {
             border_dates[i] = moment(border_dates[i], "YYYY-MM-DD").startOf('month')
         }
-        all_dates = this.getMonthsList(border_dates);
-        this.addOptions(all_dates);
-        this.onChange();
+        all_dates = MonthlyChoose.getMonthsList(border_dates);
+        MonthlyChoose.addOptions(all_dates);
+        MonthlyChoose.onChange();
 
     },
 }
@@ -354,28 +355,15 @@ var DataProvider = {
         }
     },
 
-    getMonthData: function (year, month) {
+    getMonthData: function (year, month, aCallback) {
         url = this.getURL("/api/wim/trans");
         var client = new this.HttpClient();
         data = { "year": year, "month": month };
-        Loading(true);
         client.post(url, data, function (response) {
             response = JSON.parse(response);
             Loading(false);
-            MonthlyData.init(response)
+            aCallback(response);
         })
-    },
-
-    getDates: function () {
-        url = this.getURL("/api/wim/trans/border_dates");
-
-        var client = new this.HttpClient();
-        Loading(true);
-        client.get(url, function (response) {
-            Loading(false);
-            response = JSON.parse(response);
-            MonthlyChoose.generateList(response)
-        });
     },
 
     saveCat: function (id, cat, target_cell) {
@@ -394,7 +382,8 @@ var DataProvider = {
 var Utils = {
     onLoad: function () {
         SummaryChar.init();
-        DataProvider.getDates();
+        Loading(true, 1, "Loading border dates...");
+        DataProviderSummary.getDates(MonthlyChoose.generateList);
     }
 }
 

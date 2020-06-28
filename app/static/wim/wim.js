@@ -37,14 +37,23 @@ var DataProviderSummary = {
             anHttpRequest.open("POST", aUrl, true);
             anHttpRequest.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
             anHttpRequest.send(JSON.stringify(data));
-        }
+        },
+            this.get = function (aUrl, aCallback) {
+                var anHttpRequest = new XMLHttpRequest();
+                anHttpRequest.onreadystatechange = function () {
+                    if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
+                        aCallback(anHttpRequest.responseText);
+                }
+
+                anHttpRequest.open("GET", aUrl, true);
+                anHttpRequest.send(null);
+            }
     },
 
     getMonthSummary: function (year, month, callbackFunction) {
         url = this.getURL("/api/wim/trans/summary");
         var client = new this.HttpClient();
         data = { "year": year, "month": month };
-        Loading(true);
         client.post(url, data, callbackFunction, function (response, callbackFunction, data) {
             response = JSON.parse(response);
             Loading(false);
@@ -69,6 +78,16 @@ var DataProviderSummary = {
             });
         });
 
+    },
+
+    getDates: function (aCallback) {
+        url = this.getURL("/api/wim/trans/border_dates");
+        var client = new this.HttpClient();
+        client.get(url, function (response) {
+            Loading(false);
+            response = JSON.parse(response);
+            aCallback(response);
+        });
     },
 
 }
@@ -97,16 +116,30 @@ function getCategories() {
     }
 }
 
-function Loading(status) {
+function Loading(status, counter = 1, text = "Loading...") {
     bar = $("#loading_bar");
+    value_now = parseInt(bar.attr('aria-valuenow'));
+    value_max = parseInt(bar.attr('aria-valuemax'));
     if (status) {
+        value_now = 0
+        value_max = counter
         bar.attr("style", "width: 100%");
         bar.addClass("progress-bar-animated");
-        bar.html("Loading...");
+        bar.attr('aria-valuemax', value_max)
+        bar.attr('aria-valuenow', value_now)
+        bar.html(text + "(" + (value_now + 1) + "/" + value_max + ")");
     } else {
-        bar.attr("style", "width: 100%");
-        bar.removeClass("progress-bar-animated");
-        bar.html("");
+        value_now += 1;
+        text = bar.html().split("(")[0];
+        bar.html(text + " (" + (value_now + 1) + "/" + value_max + ")");
+        bar.attr('aria-valuenow', value_now);
 
+        if (value_now == value_max) {
+            bar.removeClass("progress-bar-animated");
+            bar.html("");
+        }
     }
+    width = (value_now + 1) * 100 / value_max;
+    bar.attr("style", "width: " + width + "%");
+
 }
