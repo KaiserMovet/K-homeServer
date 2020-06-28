@@ -2,7 +2,7 @@ import json
 import os
 import threading
 from app import app as mapp
-from flask import redirect, request, render_template, Markup, flash
+from flask import redirect, request, render_template, Markup, flash, abort
 
 from app.objects.config_handler import get_config, set_path
 from app.objects.internet_check import LogCollection as acLogCollection
@@ -56,8 +56,8 @@ def wim_site_cat():
 
 @mapp.route("/wim/upload", methods=['GET', 'POST'])
 def wim_site_upload():
-    if not check_token:
-        return ""
+    if not check_token():
+        abort(401)
     if request.method == 'POST':
         if 'myfile' not in request.files:
             return redirect(request.url)
@@ -93,8 +93,8 @@ def check_token():
 # get
 @mapp.route("/api/wim/trans", methods=['GET', 'POST'])
 def api_wim_trans():
-    if not check_token:
-        return ""
+    if not check_token():
+        abort(401)
     sheet_id = get_config().SHEET_ID
     body = request.get_json()
     year = body.get("year", "")
@@ -106,8 +106,8 @@ def api_wim_trans():
 
 @mapp.route("/api/wim/cat")
 def api_wim_cat():
-    if not check_token:
-        return ""
+    if not check_token():
+        abort(401)
     sheet_id = get_config().SHEET_ID
     res = Wim(sheet_id, get_google_sem()).get_cat()
     return json.dumps(res)
@@ -115,8 +115,8 @@ def api_wim_cat():
 
 @mapp.route("/api/wim/cat_base")
 def api_wim_cat_base():
-    if not check_token:
-        return ""
+    if not check_token():
+        abort(401)
     sheet_id = get_config().SHEET_ID
     res = Wim(sheet_id, get_google_sem()).get_cat_base()
     return json.dumps(res)
@@ -124,8 +124,8 @@ def api_wim_cat_base():
 
 @mapp.route("/api/wim/trans/border_dates")
 def api_wim_trans_border_dates():
-    if not check_token:
-        return ""
+    if not check_token():
+        abort(401)
     sheet_id = get_config().SHEET_ID
     res = Wim(sheet_id, get_google_sem()).get_trans_border_dates()
     return json.dumps(res)
@@ -133,8 +133,8 @@ def api_wim_trans_border_dates():
 
 @mapp.route("/api/wim/trans/summary", methods=['POST'])
 def api_wim_trans_summary():
-    if not check_token:
-        return ""
+    if not check_token():
+        abort(401)
     sheet_id = get_config().SHEET_ID
     body = request.get_json()
     year = body.get("year", "")
@@ -145,8 +145,8 @@ def api_wim_trans_summary():
 # edit
 @mapp.route("/api/wim/edit/cat_base", methods=['POST'])
 def api_wim_edt_cat_base():
-    if not check_token:
-        return ""
+    if not check_token():
+        abort(401)
     sheet_id = get_config().SHEET_ID
     body = request.get_json()
     target = body["target"]
@@ -157,8 +157,8 @@ def api_wim_edt_cat_base():
 
 @mapp.route("/api/wim/edit/cat_trans", methods=['POST'])
 def api_wim_edt_cat_trans():
-    if not check_token:
-        return ""
+    if not check_token():
+        abort(401)
     sheet_id = get_config().SHEET_ID
     body = request.get_json()
     id = body["id"]
