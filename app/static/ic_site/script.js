@@ -195,7 +195,7 @@ var TableGenerator = {
         }
         divided_data["today"] = { "start_date": moment().startOf('day'), "end_date": moment().startOf('day'), "upload": [], "download": [] };
         for (let i = 0; i < js_data["upload"].length; i++) {
-            if (js_data["upload"][i]["x"] < divided_data["today"]["end_date"] && js_data["upload"][i]["x"] >= divided_data["today"]["start_date"]) {
+            if (js_data["upload"][i]["x"] < divided_data["today"]["end_date"].clone().add(1, "days") && js_data["upload"][i]["x"] >= divided_data["today"]["start_date"]) {
                 divided_data["today"]["upload"].push(js_data["upload"][i]["y"]);
                 divided_data["today"]["download"].push(js_data["download"][i]["y"]);
             } else {
