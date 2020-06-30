@@ -538,7 +538,6 @@ var SpeedStatus = {
 
         start_date = moment(target_row.find("#start_date").html(), "YYYY.MM.DD");
         end_date = moment(target_row.find("#end_date").html(), "YYYY.MM.DD");
-        end_date.add(1, 'days');
         return { "start_date": start_date, "end_date": end_date };
     },
 
