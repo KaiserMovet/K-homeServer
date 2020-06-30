@@ -193,7 +193,7 @@ var TableGenerator = {
                 divided_data["start_date"][year][month] = js_data["upload"][i]["x"];
             }
         }
-        divided_data["today"] = { "start_date": moment().startOf('day'), "end_date": moment().startOf('day').add(1, "days"), "upload": [], "download": [] };
+        divided_data["today"] = { "start_date": moment().startOf('day'), "end_date": moment().startOf('day'), "upload": [], "download": [] };
         for (let i = 0; i < js_data["upload"].length; i++) {
             if (js_data["upload"][i]["x"] < divided_data["today"]["end_date"] && js_data["upload"][i]["x"] >= divided_data["today"]["start_date"]) {
                 divided_data["today"]["upload"].push(js_data["upload"][i]["y"]);
@@ -538,6 +538,7 @@ var SpeedStatus = {
 
         start_date = moment(target_row.find("#start_date").html(), "YYYY.MM.DD");
         end_date = moment(target_row.find("#end_date").html(), "YYYY.MM.DD");
+        end_date.add(1, 'days');
         return { "start_date": start_date, "end_date": end_date };
     },
 
