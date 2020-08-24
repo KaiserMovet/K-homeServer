@@ -13,8 +13,6 @@ class Navbar:
     NAVBAR_BUTTONS = [
         NavbarButton("Home", "admin"),
         NavbarButton("Internet Check", "ic_site"),
-        NavbarButton("Where is my money", "wim_site_summary")
-
     ]
 
     @classmethod
