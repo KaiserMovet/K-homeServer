@@ -1,3 +1,5 @@
+import app.k_rgb.routes
+
 
 import os
 
