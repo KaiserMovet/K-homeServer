@@ -1,4 +1,5 @@
-<script type="text/javascript" src="{{ url_for('static', filename='ic_site/script.js') }}">
+{% block content %}
+<script type="text/javascript" src="{{ url_for('ic_bp.static', filename='script.js') }}">
 </script>
 
 <table class="table">
@@ -71,3 +72,4 @@
         </div>
     </div>
 </div>
+{% endblock %}

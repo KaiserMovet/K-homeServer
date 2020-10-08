@@ -1,8 +1,8 @@
-from .site import Site
+# from flask import current_app
 import app.render_manager as rm
 
 
-class MainSite(Site):
+class MainSite():
 
     @staticmethod
     def action(**kwargs):

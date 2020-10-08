@@ -1,1 +1,1 @@
-from .ic_site import IcSite
+from .main_site import MainSite

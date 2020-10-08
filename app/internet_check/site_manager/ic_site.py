@@ -4,9 +4,9 @@ from flask import render_template, Markup
 
 class IcSite():
 
-    MAIN = "sites/ic_site/main.html"
-    INTERNET_SPEED = "sites/ic_site/internet_speed.html"
-    INTERNET_STATUS = "sites/ic_site/internet_status.html"
+    MAIN = "main.html"
+    INTERNET_SPEED = "internet_speed.html"
+    INTERNET_STATUS = "internet_status.html"
 
     @classmethod
     def action(cls):

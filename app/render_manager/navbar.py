@@ -9,10 +9,10 @@ class NavbarButton:
 
 
 class Navbar:
-    NAVBAR_TEMPLATE = "common/navbar.html"
+    NAVBAR_TEMPLATE = "navbar.html"
     NAVBAR_BUTTONS = [
-        NavbarButton("Home", "admin"),
-        NavbarButton("Internet Check", "ic_site"),
+        NavbarButton("Home", "main_bp.admin"),
+        NavbarButton("Internet Check", "ic_bp.ic_site"),
     ]
 
     @classmethod

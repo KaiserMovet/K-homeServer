@@ -2,7 +2,7 @@ from flask import render_template, request
 
 
 class Base:
-    BASE_TEMPLATE = "common/base.html"
+    BASE_TEMPLATE = "base.html"
 
     @staticmethod
     def get_theme(theme):
