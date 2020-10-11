@@ -263,16 +263,15 @@ var icTable = {
         icTable.updateBar(dataDict['true_percent'], year, month);
     },
 
-    prepareDataEntry: function (true_duration, false_duration) {
+    prepareDataEntry: function (true_duration, false_duration, speedData) {
         var all_duration = true_duration.as('ms') + false_duration.as('ms');
         var true_duration_percent = true_duration * 100 / all_duration;
         true_duration_percent = Math.round((true_duration_percent + Number.EPSILON) * 100) / 100;
-
         var dataDict = {
-            "max_download": NaN,
-            "avg_download": NaN,
-            "max_upload": NaN,
-            "avg_upload": NaN,
+            "max_download": speedData["download"]["max"],
+            "avg_download": speedData["download"]["avg"],
+            "max_upload": speedData["upload"]["max"],
+            "avg_upload": speedData["upload"]["avg"],
             "true_days": Math.floor(true_duration.as('days')),
             "true_hours": true_duration.hours(),
             "true_minutes": true_duration.minutes(),
@@ -283,24 +282,43 @@ var icTable = {
         return { "all_data": dataDict, 'true_percent': true_duration_percent };
     },
 
-    updateData: function (durationCollection, yearlyDurationCollection) {
+    getSpeedData: function (speedStats, year, month = -1) {
+        var emptyEntry = { "download": { "max": 0, "avg": 0 }, "upload": { "max": 0, "avg": 0 } };
+        if (!(year in speedStats)) {
+            return emptyEntry;
+        }
+        if (month == -1) {
+            return speedStats[year];
+        } else {
+            if (!(month in speedStats[year])) {
+                return emptyEntry;
+            } else {
+                return speedStats[year][month]
+            }
+        }
+    },
+
+    updateData: function (durationCollection, yearlyDurationCollection, speedStats) {
         for (var year of Object.keys(yearlyDurationCollection).sort(function (a, b) { return b - a })) {
             let true_duration = yearlyDurationCollection[year][true];
             let false_duration = yearlyDurationCollection[year][false];
-            let dataDict = icTable.prepareDataEntry(true_duration, false_duration);
+            let speedStatsForYear = this.getSpeedData(speedStats['year'], year);
+            let dataDict = icTable.prepareDataEntry(true_duration, false_duration, speedStatsForYear);
             icTable.updateRow(dataDict, year);
             for (var month of Object.keys(durationCollection[year]).sort(function (a, b) { return b - a })) {
                 let true_duration = durationCollection[year][month][true];
                 let false_duration = durationCollection[year][month][false];
-                let dataDict = icTable.prepareDataEntry(true_duration, false_duration);
+                let speedStatsForMonth = this.getSpeedData(speedStats['month'], year, month);
+
+                let dataDict = icTable.prepareDataEntry(true_duration, false_duration, speedStatsForMonth);
                 icTable.updateRow(dataDict, year, month);
             }
         }
 
     },
 
-    main: function (durationCollection, yearlyDurationCollection) {
-        icTable.updateData(durationCollection, yearlyDurationCollection);
+    main: function (durationCollection, yearlyDurationCollection, speedStats) {
+        icTable.updateData(durationCollection, yearlyDurationCollection, speedStats);
 
     },
 }
@@ -377,25 +395,102 @@ var icStatusData = {
     },
 }
 
+var icSpeedData = {
+
+    splitByMonth: function (internet_speed) {
+        var month_data = {}
+        for (let i = 0; i < internet_speed["date"].length; i++) {
+            let entry_date = moment(internet_speed["date"][i], "YYYY.MM.DD - HH:mm:ss");
+            year = entry_date.year();
+            month = entry_date.month();
+            if (!(year in month_data)) {
+                month_data[year] = {};
+            }
+            if (!(month in month_data[year])) {
+                month_data[year][month] = { "download": [], "upload": [] };
+            }
+            month_data[year][month]["download"].push(internet_speed["download"][i]);
+            month_data[year][month]["upload"].push(internet_speed["upload"][i]);
+
+        }
+        return month_data;
+    },
+
+    getMax(array) {
+        return Math.max(...array);
+    },
+    getAvg(array) {
+        var avg = array.reduce((a, b) => a + b, 0) / array.length;
+        avg = Math.round((avg + Number.EPSILON) * 100) / 100;
+        return avg;
+    },
+
+    calculateForMonth: function (month_data) {
+        month_stats = {};
+        for (year in month_data) {
+            month_stats[year] = {}
+            for (month in month_data[year]) {
+                month_stats[year][month] = { "download": {}, "upload": {} };
+                month_stats[year][month]["download"]["max"] = icSpeedData.getMax(month_data[year][month]["download"]);
+                month_stats[year][month]["upload"]["max"] = icSpeedData.getMax(month_data[year][month]["upload"]);
+                month_stats[year][month]["download"]["avg"] = icSpeedData.getAvg(month_data[year][month]["download"]);
+                month_stats[year][month]["upload"]["avg"] = icSpeedData.getAvg(month_data[year][month]["upload"]);
+            }
+        }
+        return month_stats
+    },
+
+    calculateForYear: function (month_stats) {
+        year_stats = {};
+        for (year in month_stats) {
+            let year_list = { "download": { "max": [], "avg": [] }, "upload": { "max": [], "avg": [] } };
+            year_stats[year] = { "download": {}, "upload": {} };
+            for (month in month_stats[year]) {
+                year_list["download"]["max"].push(month_stats[year][month]["download"]['max'])
+                year_list["download"]["avg"].push(month_stats[year][month]["download"]['avg'])
+                year_list["upload"]["max"].push(month_stats[year][month]["upload"]['max'])
+                year_list["upload"]["avg"].push(month_stats[year][month]["upload"]['avg'])
+            }
+            year_stats[year]["download"]["max"] = this.getMax(year_list["download"]["max"]);
+            year_stats[year]["download"]["avg"] = this.getAvg(year_list["download"]["avg"]);
+            year_stats[year]["upload"]["max"] = this.getMax(year_list["upload"]["max"]);
+            year_stats[year]["upload"]["avg"] = this.getAvg(year_list["upload"]["avg"]);
+        }
+        return year_stats;
+    },
+
+    main: function (internet_speed) {
+        var month_data = icSpeedData.splitByMonth(internet_speed);
+        month_stats = icSpeedData.calculateForMonth(month_data);
+        year_stats = icSpeedData.calculateForYear(month_stats);
+        return { "year": year_stats, "month": month_stats };
+    },
+}
+
 var icStaticMsg = {
     setEmoji: function (status) {
         emoji = document.getElementById("emoji");
-        if (status == true) {
+        if (status == "true") {
             emoji_code = '<svg class="bi bi-emoji-laughing" width="2em" height="2em" viewBox="0 0 16 16"fill = "currentColor" xmlns = "http://www.w3.org/2000/svg" ><path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" /><path fill-rule="evenodd" d="M12.331 9.5a1 1 0 0 1 0 1A4.998 4.998 0 0 1 8 13a4.998 4.998 0 0 1-4.33-2.5A1 1 0 0 1 4.535 9h6.93a1 1 0 0 1 .866.5z" /><path d="M7 6.5c0 .828-.448 0-1 0s-1 .828-1 0S5.448 5 6 5s1 .672 1 1.5zm4 0c0 .828-.448 0-1 0s-1 .828-1 0S9.448 5 10 5s1 .672 1 1.5z" /></svg > ';
         } else {
             emoji_code = '<svg class="bi bi-emoji-frown" width="2em" height="2em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" /><path fill-rule="evenodd" d="M4.285 12.433a.5.5 0 0 0 .683-.183A3.498 3.498 0 0 1 8 10.5c1.295 0 2.426.703 3.032 1.75a.5.5 0 0 0 .866-.5A4.498 4.498 0 0 0 8 9.5a4.5 4.5 0 0 0-3.898 2.25.5.5 0 0 0 .183.683z" /><path d="M7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5zm4 0c0 .828-.448 1.5-1 1.5s-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5z" /></svg>'
         }
         emoji.innerHTML = emoji_code;
     },
-    updateMsg: function (internet_speed, internet_status) {
+    setSpeed: function (upload, download) {
+        console.log("XDD");
+        document.getElementById("last_download").innerHTML = download + " Mb/s";
+        document.getElementById("last_upload").innerHTML = upload + " Mb/s";
+    },
+    updateMsg: function (internet_speed, mergedRangeCollection) {
         main_msg = document.getElementById("main_msg");
         last_speed = document.getElementById("last_speed");
         status_msg = document.getElementById("current_status");
-        document.getElementById("last_time").innerHTML = internet_status['end_date'][0];
+        document.getElementById("last_time").innerHTML = icMain.dateToFullStr(mergedRangeCollection[0].end);
         document.getElementById("last_time").setAttribute("updated", true);
-        status = internet_status['status'][0]
+        status = mergedRangeCollection[0].status
         icStaticMsg.setEmoji(status);
-        if (status == true) {
+        if (status == "true") {
             main_msg.classList.remove("alert-danger");
             main_msg.classList.add("alert-success");
             last_speed.classList.remove("invisible");
@@ -408,6 +503,7 @@ var icStaticMsg = {
             last_speed.classList.add("invisible");
             status_msg.innerHTML = "No connection"
         }
+        this.setSpeed(internet_speed["download"][0], internet_speed["upload"][0]);
     },
     getLastDate: function () {
         return moment(document.getElementById("last_time").innerHTML, "YYYY.MM.DD - HH:mm:ss");
@@ -423,13 +519,17 @@ var icMain = {
         // Main loop function
         internet_speed = JSON.parse(internet_speed);
         internet_status = JSON.parse(internet_status);
-        icStaticMsg.updateMsg(internet_speed, internet_status);
         var res = icStatusData.main(internet_status);
         var rangeCollection = res[0];
         var durationCollection = res[1];
         var yearlyDurationCollection = res[2];
         var mergedRangeCollection = res[3];
-        icTable.main(durationCollection, yearlyDurationCollection);
+
+        speedStats = icSpeedData.main(internet_speed);
+
+        icStaticMsg.updateMsg(internet_speed, mergedRangeCollection);
+
+        icTable.main(durationCollection, yearlyDurationCollection, speedStats);
         icStatusTable.main(mergedRangeCollection);
 
 
