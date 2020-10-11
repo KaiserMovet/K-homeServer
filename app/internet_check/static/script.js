@@ -523,7 +523,7 @@ var icStaticMsg = {
         }
         emoji.innerHTML = emoji_code;
     },
-    setSpeed: function (upload, download) {
+    setSpeed: function (download, upload) {
         console.log("XDD");
         document.getElementById("last_download").innerHTML = download + " Mb/s";
         document.getElementById("last_upload").innerHTML = upload + " Mb/s";
