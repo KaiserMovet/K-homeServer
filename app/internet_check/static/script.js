@@ -53,6 +53,47 @@ class icStatusRange {
     }
 }
 
+DYGRAPH = NaN;
+var icChart = {
+
+    resizeCanvas: function () {
+        var ctx = document.getElementById("myChart");
+        ctx = ctx.getContext('2d');
+        ctx.width = window.innerWidth * 90 / 100;
+        ctx.height = window.innerHeight * 40 / 100;
+    },
+
+    getOrCreateChart: function () {
+        if (isNaN(this.DYGRAPH)) {
+            ctx = document.getElementById("myChart");
+            DYGRAPH = new Dygraph(ctx, "X\n",
+                {
+                    labels: ["Date", "Download", "Upload"],
+                    fillGraph: true,
+                    colors: ["orange", "green"],
+                    animatedZooms: true,
+                    showRangeSelector: true,
+                });
+        }
+        return DYGRAPH;
+    },
+
+    updateSpeedData(graph, internet_speed) {
+        var chartData = [];
+        for (let i = internet_speed["date"].length - 1; i >= 0; i--) {
+            let currentDate = moment(internet_speed["date"][i], 'YYYY.MM.DD HH:mm:ss').toDate();;
+            let row = [currentDate, internet_speed["download"][i], internet_speed["upload"][i]];
+            chartData.push(row);
+        }
+        graph.updateOptions({ 'file': chartData });
+        console.log(graph);
+    },
+
+    main: function (internet_speed) {
+        graph = this.getOrCreateChart();
+        this.updateSpeedData(graph, internet_speed);
+    },
+}
 
 var icStatusTable = {
     getTable: function () {
@@ -531,6 +572,7 @@ var icMain = {
 
         icTable.main(durationCollection, yearlyDurationCollection, speedStats);
         icStatusTable.main(mergedRangeCollection);
+        icChart.main(internet_speed);
 
 
 
