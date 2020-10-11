@@ -280,8 +280,7 @@ var icTable = {
         return [row, row_bar];
     },
 
-    updateBar: function (true_percent, year, month = -1) {
-        var false_percent = 100 - true_percent;
+    updateBar: function (true_percent, false_percent, year, month = -1) {
         var row_id = icTable.getRowId(year, month);
         var table = icTable.getTable();
         var true_bar = table.find("#" + row_id + "_bar_true");
@@ -301,13 +300,19 @@ var icTable = {
             let cell = row.find('#' + key);
             cell.html(allData[key]);
         }
-        icTable.updateBar(dataDict['true_percent'], year, month);
+        icTable.updateBar(dataDict['true_percent'], dataDict['false_percent'], year, month);
     },
 
     prepareDataEntry: function (true_duration, false_duration, speedData) {
         var all_duration = true_duration.as('ms') + false_duration.as('ms');
+
         var true_duration_percent = true_duration * 100 / all_duration;
         true_duration_percent = Math.round((true_duration_percent + Number.EPSILON) * 100) / 100;
+
+        var false_duration_percent = false_duration * 100 / all_duration;
+        false_duration_percent = Math.round((false_duration_percent + Number.EPSILON) * 100) / 100;
+
+
         var dataDict = {
             "max_download": speedData["download"]["max"],
             "avg_download": speedData["download"]["avg"],
@@ -320,7 +325,7 @@ var icTable = {
             "false_hours": false_duration.hours(),
             "false_minutes": false_duration.minutes(),
         }
-        return { "all_data": dataDict, 'true_percent': true_duration_percent };
+        return { "all_data": dataDict, 'true_percent': true_duration_percent, "false_percent": false_duration_percent };
     },
 
     getSpeedData: function (speedStats, year, month = -1) {
