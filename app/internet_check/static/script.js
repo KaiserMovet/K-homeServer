@@ -167,6 +167,7 @@ var icTable = {
         } else {
             //Name cell
             cell = $('<td></td>');
+            cell.html(moment().month(month).format("MMMM"))
             row.append(cell);
         }
         // Date and speed cells
