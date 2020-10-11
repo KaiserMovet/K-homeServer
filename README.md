@@ -1,4 +1,7 @@
 # K-homeServer
+## release-7
+- Rework of internet check scripts
+- Use dygraphs instead of chart.js (due to performance)
 ## release-5 (abandon)
 - final with where is my money
 ## release-3
