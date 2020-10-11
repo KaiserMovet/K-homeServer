@@ -22,3 +22,27 @@ var CookieManager = {
         document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
     }
 }
+
+var RequestManager = {
+
+    HttpClient: function () {
+        this.get = function (aUrl, aCallback, ...args) {
+            var anHttpRequest = new XMLHttpRequest();
+            anHttpRequest.onreadystatechange = function () {
+                if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
+                    aCallback(anHttpRequest.responseText, ...args);
+            }
+
+            anHttpRequest.open("GET", aUrl, true);
+            anHttpRequest.send(null);
+        }
+    },
+
+    getData: function (aUrl, aCallback, ...args) {
+        local = window.location.origin;
+        //local = "http://nanopi:5000"
+        var client = new this.HttpClient();
+        client.get(local + aUrl, aCallback, ...args);
+
+    },
+}

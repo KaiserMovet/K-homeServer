@@ -13,10 +13,13 @@
         src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.js') }}"></script>
     <script type="text/javascript"
         src="{{ url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.js') }}"></script>
+    <!-- Moment -->
     <script type="text/javascript" src="{{ url_for('static', filename='node_modules/moment/moment.js') }}"></script>
     <script>
         moment().format();
     </script>
+    <script type="text/javascript"
+        src="{{ url_for('static', filename='node_modules/moment-range/dist/moment-range.js') }}"></script>
     <!-- Charts -->
     <script type="text/javascript"
         src="{{ url_for('static', filename='node_modules/chart.js/dist/Chart.min.js') }}"></script>

@@ -1,23 +1,12 @@
-<data id="internet_status_data"></data>
-
-<table class="table table-responsive table-bordered table-sm" id="status_table">
+<table class="table table-responsive" id="status_table">
     <thead>
-        <th scope="col">Date</th>
+        <th scope="col">From</th>
+        <th scope="col">To</th>
+        <th scope="col">Status</th>
         <th scope="col">Days</th>
-        <th scope="col">hours</th>
-        <th scope="col">minutes</th>
-        <th scope="col">Days</th>
-        <th scope="col">hours</th>
-        <th scope="col">minutes</th>
+        <th scope="col">Hours</th>
+        <th scope="col">Minutes</th>
     </thead>
     <tbody>
     </tbody>
 </table>
-
-<div id="status_logs">
-    {% for log in [] %}
-    <div class="{{'alert alert-success' if log.status else 'alert alert-danger'}}" role="alert">
-        {{log}}
-    </div>
-    {% endfor %}
-</div>
