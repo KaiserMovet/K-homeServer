@@ -532,7 +532,7 @@ var icStaticMsg = {
     generateDurationMsg: function (statusRange) {
         let msg = "";
         console.log(statusRange.status);
-        if (statusRange.status == "true") {
+        if (statusRange.status) {
             msg += "There is connection for ";
         } else {
             msg += "There is no connection for ";
