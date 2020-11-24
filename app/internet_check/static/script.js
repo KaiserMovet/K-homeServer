@@ -528,10 +528,27 @@ var icStaticMsg = {
         document.getElementById("last_download").innerHTML = download + " Mb/s";
         document.getElementById("last_upload").innerHTML = upload + " Mb/s";
     },
+
+    generateDurationMsg: function (statusRange) {
+        let msg = "";
+        if (statusRange.status == "true") {
+            msg += "There is connection for ";
+        } else {
+            msg += "There is no connection for ";
+        }
+        sr_duration = statusRange.getDuration();
+        msg += Math.floor(duration.as('days')).toString() + " days, ";
+        msg += duration.hours().toString() + " hours and ";
+        msg += duration.minutes().toString() + " minutes";
+        return msg;
+    },
+
     updateMsg: function (internet_speed, mergedRangeCollection) {
         main_msg = document.getElementById("main_msg");
         last_speed = document.getElementById("last_speed");
         status_msg = document.getElementById("current_status");
+        duration_msg = document.getElementById("duration_msg");
+
         document.getElementById("last_time").innerHTML = icMain.dateToFullStr(mergedRangeCollection[0].end);
         document.getElementById("last_time").setAttribute("updated", true);
         status = mergedRangeCollection[0].status
@@ -549,6 +566,7 @@ var icStaticMsg = {
             last_speed.classList.add("invisible");
             status_msg.innerHTML = "No connection"
         }
+        duration_msg.innerHTML = this.generateDurationMsg(mergedRangeCollection[0]);
         this.setSpeed(internet_speed["download"][0], internet_speed["upload"][0]);
     },
     getLastDate: function () {
