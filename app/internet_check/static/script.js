@@ -537,9 +537,9 @@ var icStaticMsg = {
             msg += "There is no connection for ";
         }
         sr_duration = statusRange.getDuration();
-        msg += Math.floor(duration.as('days')).toString() + " days, ";
-        msg += duration.hours().toString() + " hours and ";
-        msg += duration.minutes().toString() + " minutes";
+        msg += Math.floor(sr_duration.as('days')).toString() + " days, ";
+        msg += sr_duration.hours().toString() + " hours and ";
+        msg += sr_duration.minutes().toString() + " minutes";
         return msg;
     },
 
