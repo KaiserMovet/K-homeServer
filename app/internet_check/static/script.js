@@ -71,7 +71,7 @@ var icChart = {
                     labels: ["Date", "Download", "Upload"],
                     fillGraph: true,
                     colors: ["orange", "green"],
-                    animatedZooms: true,
+                    animatedZooms: false,
                     showRangeSelector: true,
                 });
         }
@@ -86,7 +86,6 @@ var icChart = {
             chartData.push(row);
         }
         graph.updateOptions({ 'file': chartData });
-        console.log(graph);
     },
 
     main: function (internet_speed) {
@@ -524,14 +523,12 @@ var icStaticMsg = {
         emoji.innerHTML = emoji_code;
     },
     setSpeed: function (download, upload) {
-        console.log("XDD");
         document.getElementById("last_download").innerHTML = download + " Mb/s";
         document.getElementById("last_upload").innerHTML = upload + " Mb/s";
     },
 
     generateDurationMsg: function (statusRange) {
         let msg = "";
-        console.log(statusRange.status);
         if (statusRange.status) {
             msg += "There is connection for ";
         } else {
